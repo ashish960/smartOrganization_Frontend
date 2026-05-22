@@ -1,10 +1,8 @@
-import "./globals.css";
-import Providers from "./Providers";
+"use client";
 
-export const metadata = {
-  title: "SmartOrg AI",
-  description: "Enterprise AI Knowledge Assistant",
-};
+import { Provider } from "react-redux";
+import store from "../store/index";
+import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -12,9 +10,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Providers>{children}</Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-light-surface dark:bg-dark-surface text-neutral-900 dark:text-neutral-50">
+        <Provider store={store}>
+          {children}
+        </Provider>
       </body>
     </html>
   );
