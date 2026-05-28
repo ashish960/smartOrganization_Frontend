@@ -21,19 +21,31 @@ export const useAuth = () => {
   );
 
   // Register
-  const register = async (name: string, email: string, password: string) => {
-    dispatch(registerStart());
-    try {
-      const data = await authService.register(name, email, password);
-      dispatch(registerSuccess(data));
-      return data;
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Registration failed";
-      dispatch(registerFailure(errorMessage));
-      throw err;
-    }
-  };
+  const register = async (
+  name: string,
+  email: string,
+  password: string,
+  orgName: string,
+  industry: string,
+  size: string
+) => {
+  dispatch(registerStart());
+  try {
+    const data = await authService.register(
+      name,
+      email,
+      password,
+      { companyName: orgName, industry, companySize: size }
+    );
+    dispatch(registerSuccess(data));
+    return data;
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Registration failed";
+    dispatch(registerFailure(errorMessage));
+    throw err;
+  }
+};
 
   // Login
   const login = async (email: string, password: string) => {

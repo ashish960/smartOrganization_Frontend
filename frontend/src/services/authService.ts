@@ -2,14 +2,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/a
 
 const authService = {
     // Register
-    register: async (name, email, password) => {
+    register: async (name, email, password, organizationData) => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ name, email, password, ...organizationData }),
             });
 
             const data = await response.json();

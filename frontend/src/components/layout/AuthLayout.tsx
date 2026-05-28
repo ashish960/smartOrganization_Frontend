@@ -23,7 +23,7 @@ const AuthLayout = ({ children, title, subtitle, footerLink }: AuthLayoutProps) 
       <div className="grid-pattern" />
 
       {/* Main Container */}
-      <div className="relative w-full max-w-md z-10">
+      <div className="relative w-full max-w-lg z-10">
 
         {/* Logo/Branding */}
         <div className="text-center mb-8">

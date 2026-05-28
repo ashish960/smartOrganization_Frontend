@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { useToastContext } from "@/context/ToastContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, error } = useAuth();
+  const { login, isLoading } = useAuth();
+  const { toast } = useToastContext();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -53,14 +55,16 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     try {
       await login(formData.email, formData.password);
+      toast.success("Welcome back! Logged in successfully");
       router.push("/dashboard");
-    } catch (err) {
-      console.log("Login failed:", err);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Login failed";
+      toast.error(errorMessage);
     }
   };
 
@@ -69,32 +73,15 @@ export default function LoginPage() {
       title="Welcome Back"
       subtitle="AI-Powered Document Intelligence"
       footerLink={{
-        text: "Don't have an account?",
-        linkText: "Sign Up",
+        text: "Create your own organization : ",
+        linkText: "Register Organization",
         href: "/auth/register",
       }}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-
-        {/* API Error */}
-        {error && (
-          <div
-            className="p-3 rounded-lg text-sm text-center"
-            style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              color: "var(--color-error)",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
         {/* Email */}
         <div>
-          <label className="dark-label">
-            Email Address
-          </label>
+          <label className="dark-label">Email Address</label>
           <input
             name="email"
             type="email"
@@ -137,7 +124,7 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}

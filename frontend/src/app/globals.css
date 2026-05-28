@@ -252,3 +252,7 @@ body {
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
