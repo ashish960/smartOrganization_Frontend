@@ -10,16 +10,16 @@ export interface NavItem {
 // To add a new page: just add an entry here — sidebar updates automatically
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard",   icon: "Dashboard",   href: "/dashboard"                          },
-  { label: "Documents",   icon: "Documents",   href: "/coming-soon?feature=Documents"      },
+  { label: "Documents",   icon: "Documents",   href: "/documents"      },
   { label: "AI Chat",     icon: "AI",          href: "/coming-soon?feature=AI Chat"        },
-  { label: "Departments", icon: "Department",  href: "/coming-soon?feature=Departments"    },
-  { label: "Team",        icon: "Users",       href: "/coming-soon?feature=Team"           },
+  { label: "Departments", icon: "Department", href: "/departments" },
+  { label: "Team", icon: "Users", href: "/team" },
   { label: "Analytics",   icon: "Analytics",   href: "/coming-soon?feature=Analytics"      },
   { label: "Settings",    icon: "Settings",    href: "/coming-soon?feature=Settings"       },
 ];
 
 export const QUICK_ACTIONS = [
-  { label: "Upload Document", icon: "Upload"     as IconName, color: "#3b82f6", href: "/coming-soon?feature=Documents"   },
+  { label: "Upload Document", icon: "Upload", color: "#3b82f6", href: "/documents" },
   { label: "Start AI Chat",   icon: "AI"         as IconName, color: "#a855f7", href: "/coming-soon?feature=AI Chat"     },
   { label: "Invite Members",  icon: "Users"      as IconName, color: "#10b981", href: "/coming-soon?feature=Team"        },
   { label: "Add Department",  icon: "Department" as IconName, color: "#f59e0b", href: "/coming-soon?feature=Departments" },
