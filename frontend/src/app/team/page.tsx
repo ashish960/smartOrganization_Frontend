@@ -5,7 +5,6 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useSelector } from "react-redux";
 import { AppRootState } from "@/store";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface TeamMember {
   _id: string;
   name: string;
@@ -25,9 +24,16 @@ interface Department {
   icon: string;
 }
 
+interface AddMemberForm {
+  name: string;
+  email: string;
+  role: string;
+  jobTitle: string;
+  departmentId: string;
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 const getRoleStyle = (role: string) => {
   const map: Record<string, { bg: string; color: string; label: string }> = {
     ORG_ADMIN:    { bg: "rgba(168,85,247,0.12)", color: "#a855f7", label: "Org Admin"    },
@@ -44,11 +50,9 @@ const formatDate = (dateStr: string | null) => {
   return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 };
 
-const getInitials = (name: string) => {
-  return name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
-};
+const getInitials = (name: string) =>
+  name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
 
-// ── Modal ──────────────────────────────────────────────────────────────────
 function Modal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }} onClick={onClose}>
@@ -59,37 +63,57 @@ function Modal({ onClose, children }: { onClose: () => void; children: React.Rea
   );
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: "16px" }}>
+      <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--color-text-muted)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%", padding: "10px 14px", borderRadius: "8px",
+  background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)",
+  color: "var(--color-text)", fontSize: "14px", outline: "none", boxSizing: "border-box",
+};
+
 export default function TeamPage() {
   const { token, user } = useSelector((state: AppRootState) => state.auth);
 
-  const [members, setMembers]           = useState<TeamMember[]>([]);
-  const [departments, setDepartments]   = useState<Department[]>([]);
-  const [isLoading, setIsLoading]       = useState(true);
-  const [searchQuery, setSearchQuery]   = useState("");
-  const [roleFilter, setRoleFilter]     = useState("all");
-  const [deptFilter, setDeptFilter]     = useState("all");
-  const [error, setError]               = useState<string | null>(null);
-  const [success, setSuccess]           = useState<string | null>(null);
-  const [refresh, setRefresh]           = useState(0);
+  const [members, setMembers]         = useState<TeamMember[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [isLoading, setIsLoading]     = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter]   = useState("all");
+  const [deptFilter, setDeptFilter]   = useState("all");
+  const [error, setError]             = useState<string | null>(null);
+  const [success, setSuccess]         = useState<string | null>(null);
+  const [refresh, setRefresh]         = useState(0);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [showProfile, setShowProfile]   = useState(false);
-  const [removingId, setRemovingId]     = useState<string | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [removingId, setRemovingId]   = useState<string | null>(null);
+  const [isSaving, setIsSaving]       = useState(false);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+
+  const [addForm, setAddForm] = useState<AddMemberForm>({
+    name: "", email: "", role: "USER", jobTitle: "", departmentId: "",
+  });
 
   const isAdmin = (user as { role?: string } | null)?.role === "ORG_ADMIN";
 
-  const showSuccess = (msg: string) => { setSuccess(msg); setTimeout(() => setSuccess(null), 3000); };
+  const showSuccess = (msg: string) => { setSuccess(msg); setTimeout(() => setSuccess(null), 4000); };
   const showError   = (msg: string) => { setError(msg);   setTimeout(() => setError(null),   4000); };
 
-  // ── Fetch ──────────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
         setIsLoading(true);
         const [membRes, deptRes] = await Promise.all([
-          fetch(`${API_BASE}/organization/members`,  { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`${API_BASE}/departments`,           { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/organization/members`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/departments`,          { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         const [membData, deptData] = await Promise.all([membRes.json(), deptRes.json()]);
         if (!cancelled) {
@@ -103,7 +127,27 @@ export default function TeamPage() {
     return () => { cancelled = true; };
   }, [token, refresh]);
 
-  // ── Remove member ──────────────────────────────────────────────────────
+  const handleAddMember = async () => {
+    if (!addForm.name || !addForm.email) return showError("Name and email are required");
+    setIsSaving(true);
+    try {
+      const res  = await fetch(`${API_BASE}/auth/add-member`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(addForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTempPassword(data.data.tempPassword);
+        setRefresh(p => p + 1);
+        setAddForm({ name: "", email: "", role: "USER", jobTitle: "", departmentId: "" });
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (err: unknown) { showError(err instanceof Error ? err.message : "Failed to add member"); }
+    finally { setIsSaving(false); }
+  };
+
   const handleRemove = async (memberId: string) => {
     if (!confirm("Remove this member from the organization?")) return;
     setRemovingId(memberId);
@@ -116,12 +160,14 @@ export default function TeamPage() {
     finally { setRemovingId(null); }
   };
 
-  // ── Filter ─────────────────────────────────────────────────────────────
   const filtered = members.filter((m) => {
     if (searchQuery && !m.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
         !m.email.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (roleFilter !== "all" && m.role !== roleFilter) return false;
-    if (deptFilter !== "all" && m.department?._id !== deptFilter) return false;
+    if (deptFilter !== "all") {
+      if (deptFilter === "none" && m.department !== null) return false;
+      if (deptFilter !== "none" && m.department?._id !== deptFilter) return false;
+    }
     return true;
   });
 
@@ -137,16 +183,20 @@ export default function TeamPage() {
       {success && <div style={{ position: "fixed", top: "80px", right: "24px", zIndex: 999, padding: "12px 20px", borderRadius: "10px", background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", fontSize: "14px", fontWeight: "500" }}>✅ {success}</div>}
       {error   && <div style={{ position: "fixed", top: "80px", right: "24px", zIndex: 999, padding: "12px 20px", borderRadius: "10px", background: "rgba(239,68,68,0.15)",   border: "1px solid rgba(239,68,68,0.3)",   color: "#ef4444", fontSize: "14px", fontWeight: "500" }}>❌ {error} <button onClick={() => setError(null)} style={{ marginLeft: "12px", background: "none", border: "none", cursor: "pointer", color: "#ef4444" }}>✕</button></div>}
 
-      {/* ── Top bar ── */}
+      {/* Top bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
         <input type="text" placeholder="Search by name or email..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           style={{ flex: 1, minWidth: "200px", maxWidth: "340px", padding: "10px 16px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "14px", outline: "none" }} />
+        {isAdmin && (
+          <button onClick={() => setShowAddMember(true)} className="gradient-button" style={{ padding: "10px 20px", fontSize: "14px" }}>
+            + Add Member
+          </button>
+        )}
       </div>
 
-      {/* ── Filter bar ── */}
+      {/* Filter bar */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px", padding: "14px 16px", borderRadius: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", flexWrap: "wrap" }}>
         <span style={{ fontSize: "12px", color: "var(--color-text-muted)", fontWeight: "600" }}>FILTER BY</span>
-
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} style={selectStyle}>
           <option value="all">All Roles</option>
           <option value="ORG_ADMIN">Org Admin</option>
@@ -154,29 +204,23 @@ export default function TeamPage() {
           <option value="USER">User</option>
           <option value="VIEWER">Viewer</option>
         </select>
-
         <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} style={selectStyle}>
           <option value="all">All Departments</option>
           <option value="none">No Department</option>
-          {departments.map((d) => (
-            <option key={d._id} value={d._id}>{d.icon} {d.name}</option>
-          ))}
+          {departments.map((d) => <option key={d._id} value={d._id}>{d.icon} {d.name}</option>)}
         </select>
-
         {(roleFilter !== "all" || deptFilter !== "all") && (
-          <button onClick={() => { setRoleFilter("all"); setDeptFilter("all"); }} style={{ padding: "8px 12px", borderRadius: "8px", fontSize: "12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", cursor: "pointer", fontWeight: "600" }}>
-            Clear
-          </button>
+          <button onClick={() => { setRoleFilter("all"); setDeptFilter("all"); }} style={{ padding: "8px 12px", borderRadius: "8px", fontSize: "12px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", cursor: "pointer", fontWeight: "600" }}>Clear</button>
         )}
       </div>
 
-      {/* ── Stats ── */}
+      {/* Stats */}
       <div style={{ display: "flex", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
         {[
-          { label: "Total Members",  value: members.length,                                          color: "#3b82f6" },
-          { label: "Admins",         value: members.filter(m => m.role === "ORG_ADMIN").length,      color: "#a855f7" },
-          { label: "Managers",       value: members.filter(m => m.role === "DEPT_MANAGER").length,   color: "#f59e0b" },
-          { label: "Showing",        value: filtered.length,                                         color: "#10b981" },
+          { label: "Total Members", value: members.length,                                        color: "#3b82f6" },
+          { label: "Admins",        value: members.filter(m => m.role === "ORG_ADMIN").length,    color: "#a855f7" },
+          { label: "Managers",      value: members.filter(m => m.role === "DEPT_MANAGER").length, color: "#f59e0b" },
+          { label: "Showing",       value: filtered.length,                                       color: "#10b981" },
         ].map((s) => (
           <div key={s.label} style={{ padding: "12px 20px", borderRadius: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "20px", fontWeight: "700", color: s.color }}>{s.value}</span>
@@ -185,7 +229,7 @@ export default function TeamPage() {
         ))}
       </div>
 
-      {/* ── Member grid ── */}
+      {/* Member grid */}
       {isLoading ? (
         <div style={{ display: "flex", justifyContent: "center", padding: "60px", opacity: 0.5 }}>
           <div style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid #3b82f6", animation: "spin 0.8s linear infinite" }}/>
@@ -194,21 +238,17 @@ export default function TeamPage() {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 20px", gap: "16px", opacity: 0.5 }}>
           <span style={{ fontSize: "48px" }}>👥</span>
           <p style={{ fontSize: "18px", fontWeight: "600" }}>No members found</p>
-          <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>Try adjusting your filters</p>
+          <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>Try adjusting your filters or add a new member</p>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
           {filtered.map((member) => {
-            const roleStyle = getRoleStyle(member.role);
+            const roleStyle     = getRoleStyle(member.role);
             const isCurrentUser = (user as { id?: string } | null)?.id === member._id;
             return (
-              <div key={member._id} style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: isCurrentUser ? "1px solid rgba(59,130,246,0.3)" : "1px solid var(--color-border)", display: "flex", flexDirection: "column", gap: "12px", transition: "all 0.2s ease", position: "relative" }}>
+              <div key={member._id} style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: isCurrentUser ? "1px solid rgba(59,130,246,0.3)" : "1px solid var(--color-border)", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
+                {isCurrentUser && <span style={{ position: "absolute", top: "12px", right: "12px", fontSize: "10px", padding: "2px 7px", borderRadius: "5px", background: "rgba(59,130,246,0.15)", color: "#3b82f6", fontWeight: "600" }}>YOU</span>}
 
-                {isCurrentUser && (
-                  <span style={{ position: "absolute", top: "12px", right: "12px", fontSize: "10px", padding: "2px 7px", borderRadius: "5px", background: "rgba(59,130,246,0.15)", color: "#3b82f6", fontWeight: "600" }}>YOU</span>
-                )}
-
-                {/* Avatar + name */}
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ width: "46px", height: "46px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: "700", color: "#fff", flexShrink: 0 }}>
                     {getInitials(member.name)}
@@ -219,17 +259,10 @@ export default function TeamPage() {
                   </div>
                 </div>
 
-                {/* Role badge */}
-                <span style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "6px", fontWeight: "600", background: roleStyle.bg, color: roleStyle.color, alignSelf: "flex-start" }}>
-                  {roleStyle.label}
-                </span>
+                <span style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "6px", fontWeight: "600", background: roleStyle.bg, color: roleStyle.color, alignSelf: "flex-start" }}>{roleStyle.label}</span>
 
-                {/* Job title */}
-                {member.jobTitle && (
-                  <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>💼 {member.jobTitle}</p>
-                )}
+                {member.jobTitle && <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>💼 {member.jobTitle}</p>}
 
-                {/* Department */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
                   <span style={{ fontSize: "14px" }}>{member.department?.icon ?? "🏢"}</span>
                   <div>
@@ -238,16 +271,10 @@ export default function TeamPage() {
                   </div>
                 </div>
 
-                {/* Last login */}
-                <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
-                  Last login: {formatDate(member.lastLogin)}
-                </p>
+                <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Last login: {formatDate(member.lastLogin)}</p>
 
-                {/* Actions */}
                 <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
-                  <button onClick={() => { setSelectedMember(member); setShowProfile(true); }} style={{ flex: 1, padding: "8px", borderRadius: "8px", background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>
-                    View Profile
-                  </button>
+                  <button onClick={() => { setSelectedMember(member); setShowProfile(true); }} style={{ flex: 1, padding: "8px", borderRadius: "8px", background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>View Profile</button>
                   {isAdmin && !isCurrentUser && (
                     <button onClick={() => handleRemove(member._id)} disabled={removingId === member._id} style={{ padding: "8px 12px", borderRadius: "8px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>
                       {removingId === member._id ? "..." : "Remove"}
@@ -260,10 +287,77 @@ export default function TeamPage() {
         </div>
       )}
 
+      {/* ── Add Member Modal ── */}
+      {showAddMember && (
+        <Modal onClose={() => { setShowAddMember(false); setTempPassword(null); setAddForm({ name: "", email: "", role: "USER", jobTitle: "", departmentId: "" }); }}>
+          <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Add Team Member</h2>
+          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "24px" }}>Create a new account under your organization</p>
+
+          {tempPassword ? (
+            // Success state — show temp password
+            <div>
+              <div style={{ padding: "16px", borderRadius: "10px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: "20px" }}>
+                <p style={{ fontSize: "14px", fontWeight: "600", color: "#10b981", marginBottom: "8px" }}>✅ Member added successfully!</p>
+                <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "12px" }}>Share these credentials with the new member:</p>
+                <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(0,0,0,0.2)", border: "1px solid var(--color-border)" }}>
+                  <p style={{ fontSize: "12px", color: "var(--color-text-muted)", marginBottom: "4px" }}>Temporary Password</p>
+                  <p style={{ fontSize: "16px", fontWeight: "700", fontFamily: "monospace", color: "#f59e0b", letterSpacing: "0.05em" }}>{tempPassword}</p>
+                </div>
+                <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "8px" }}>⚠️ Make sure to copy this — it won't be shown again.</p>
+              </div>
+              <button onClick={() => { setShowAddMember(false); setTempPassword(null); }} className="gradient-button" style={{ width: "100%", padding: "10px", fontSize: "14px" }}>Done</button>
+            </div>
+          ) : (
+            // Form state
+            <div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <Field label="Full Name *">
+                    <input value={addForm.name} onChange={(e) => setAddForm(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="John Doe" />
+                  </Field>
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <Field label="Email *">
+                    <input value={addForm.email} onChange={(e) => setAddForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} placeholder="john@example.com" type="email" />
+                  </Field>
+                </div>
+                <Field label="Role">
+                  <select value={addForm.role} onChange={(e) => setAddForm(p => ({ ...p, role: e.target.value }))} style={inputStyle}>
+                    <option value="USER">User</option>
+                    <option value="DEPT_MANAGER">Dept Manager</option>
+                    <option value="VIEWER">Viewer</option>
+                    <option value="ORG_ADMIN">Org Admin</option>
+                  </select>
+                </Field>
+                <Field label="Department">
+                  <select value={addForm.departmentId} onChange={(e) => setAddForm(p => ({ ...p, departmentId: e.target.value }))} style={inputStyle}>
+                    <option value="">No Department</option>
+                    {departments.map((d) => <option key={d._id} value={d._id}>{d.icon} {d.name}</option>)}
+                  </select>
+                </Field>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <Field label="Job Title">
+                    <input value={addForm.jobTitle} onChange={(e) => setAddForm(p => ({ ...p, jobTitle: e.target.value }))} style={inputStyle} placeholder="e.g. Software Engineer" />
+                  </Field>
+                </div>
+              </div>
+
+              <div style={{ padding: "12px 14px", borderRadius: "8px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", marginBottom: "20px" }}>
+                <p style={{ fontSize: "12px", color: "#f59e0b" }}>⚠️ A temporary password will be generated. Share it with the new member so they can log in.</p>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={() => setShowAddMember(false)} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
+                <button onClick={handleAddMember} disabled={isSaving} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Adding..." : "Add Member"}</button>
+              </div>
+            </div>
+          )}
+        </Modal>
+      )}
+
       {/* ── Profile Modal ── */}
       {showProfile && selectedMember && (
         <Modal onClose={() => { setShowProfile(false); setSelectedMember(null); }}>
-          {/* Avatar */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
             <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "26px", fontWeight: "700", color: "#fff" }}>
               {getInitials(selectedMember.name)}
@@ -277,15 +371,14 @@ export default function TeamPage() {
             </span>
           </div>
 
-          {/* Details grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
             {[
-              { label: "Job Title",       value: selectedMember.jobTitle ?? "Not set"                     },
-              { label: "Department",      value: selectedMember.department?.name ?? "None"                },
-              { label: "Email Verified",  value: selectedMember.isEmailVerified ? "✅ Yes" : "❌ No"      },
-              { label: "Member Since",    value: formatDate(selectedMember.createdAt)                     },
-              { label: "Last Login",      value: formatDate(selectedMember.lastLogin)                     },
-              { label: "Dept Code",       value: selectedMember.department?.code ?? "—"                  },
+              { label: "Job Title",      value: selectedMember.jobTitle ?? "Not set"                },
+              { label: "Department",     value: selectedMember.department?.name ?? "None"           },
+              { label: "Email Verified", value: selectedMember.isEmailVerified ? "✅ Yes" : "❌ No" },
+              { label: "Member Since",   value: formatDate(selectedMember.createdAt)                },
+              { label: "Last Login",     value: formatDate(selectedMember.lastLogin)                },
+              { label: "Dept Code",      value: selectedMember.department?.code ?? "—"             },
             ].map((item) => (
               <div key={item.label} style={{ padding: "12px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
                 <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginBottom: "4px" }}>{item.label}</p>

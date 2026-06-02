@@ -13,6 +13,14 @@ interface Member {
   role: string;
 }
 
+interface OrgMember {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: { _id: string; name: string } | null;
+}
+
 interface Department {
   _id: string;
   name: string;
@@ -21,10 +29,7 @@ interface Department {
   description: string;
   head: Member | null;
   members: Member[];
-  permissions: {
-    documentVisibility: string;
-    canAccessDepartments: string[];
-  };
+  permissions: { documentVisibility: string; canAccessDepartments: string[] };
   isMandatory: boolean;
   isFromTemplate: boolean;
   createdAt: string;
@@ -38,7 +43,7 @@ interface Template {
   description: string;
 }
 
-type ModalType = "none" | "create-template" | "create-custom" | "view" | "add-member";
+type ModalType = "none" | "create-template" | "create-custom" | "view" | "add-member" | "access-matrix";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -86,37 +91,47 @@ const inputStyle: React.CSSProperties = {
 export default function DepartmentsPage() {
   const { token } = useSelector((state: AppRootState) => state.auth);
 
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [templates, setTemplates]     = useState<Template[]>([]);
-  const [isLoading, setIsLoading]     = useState(true);
-  const [modal, setModal]             = useState<ModalType>("none");
-  const [selected, setSelected]       = useState<Department | null>(null);
-  const [error, setError]             = useState<string | null>(null);
-  const [success, setSuccess]         = useState<string | null>(null);
-  const [refresh, setRefresh]         = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [customForm, setCustomForm]   = useState({ name: "", code: "", icon: "📁", description: "" });
+  const [departments, setDepartments]   = useState<Department[]>([]);
+  const [templates, setTemplates]       = useState<Template[]>([]);
+  const [orgMembers, setOrgMembers]     = useState<OrgMember[]>([]);
+  const [isLoading, setIsLoading]       = useState(true);
+  const [modal, setModal]               = useState<ModalType>("none");
+  const [selected, setSelected]         = useState<Department | null>(null);
+  const [error, setError]               = useState<string | null>(null);
+  const [success, setSuccess]           = useState<string | null>(null);
+  const [refresh, setRefresh]           = useState(0);
+  const [searchQuery, setSearchQuery]   = useState("");
+  const [memberSearch, setMemberSearch] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [customForm, setCustomForm]     = useState({ name: "", code: "", icon: "📁", description: "" });
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [memberEmail, setMemberEmail] = useState("");
-  const [isSaving, setIsSaving]       = useState(false);
+  const [isSaving, setIsSaving]         = useState(false);
+  const [accessDeptIds, setAccessDeptIds] = useState<string[]>([]); // ← MOVED INSIDE component
 
   const showSuccess = (msg: string) => { setSuccess(msg); setTimeout(() => setSuccess(null), 3000); };
   const showError   = (msg: string) => { setError(msg);   setTimeout(() => setError(null),   4000); };
-  const closeModal  = () => { setModal("none"); setSelected(null); setCustomForm({ name: "", code: "", icon: "📁", description: "" }); setMemberEmail(""); setSelectedTemplateId(""); };
+  const closeModal  = () => {
+    setModal("none"); setSelected(null);
+    setCustomForm({ name: "", code: "", icon: "📁", description: "" });
+    setSelectedTemplateId(""); setSelectedUserId(""); setMemberSearch("");
+    setAccessDeptIds([]);
+  };
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
         setIsLoading(true);
-        const [deptRes, tmplRes] = await Promise.all([
+        const [deptRes, tmplRes, membRes] = await Promise.all([
           fetch(`${API_BASE}/departments`,           { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`${API_BASE}/departments/templates`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/organization/members`,  { headers: { Authorization: `Bearer ${token}` } }),
         ]);
-        const [deptData, tmplData] = await Promise.all([deptRes.json(), tmplRes.json()]);
+        const [deptData, tmplData, membData] = await Promise.all([deptRes.json(), tmplRes.json(), membRes.json()]);
         if (!cancelled) {
           if (deptData.success) setDepartments(deptData.data);
           if (tmplData.success) setTemplates(tmplData.data);
+          if (membData.success) setOrgMembers(membData.data);
         }
       } catch { if (!cancelled) showError("Failed to load departments"); }
       finally  { if (!cancelled) setIsLoading(false); }
@@ -150,12 +165,42 @@ export default function DepartmentsPage() {
   };
 
   const handleAddMember = async () => {
-    if (!memberEmail || !selected) return showError("Enter a user ID");
+    if (!selectedUserId || !selected) return showError("Please select a member");
+    if (selected.members.some(m => m._id === selectedUserId)) return showError("User is already a member of this department");
     setIsSaving(true);
     try {
-      const res  = await fetch(`${API_BASE}/departments/${selected._id}/add-member`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ userId: memberEmail }) });
+      const res  = await fetch(`${API_BASE}/departments/${selected._id}/add-member`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ userId: selectedUserId }) });
       const data = await res.json();
       if (data.success) { showSuccess("Member added!"); setRefresh(p => p + 1); closeModal(); }
+      else throw new Error(data.message);
+    } catch (err: unknown) { showError(err instanceof Error ? err.message : "Failed"); }
+    finally { setIsSaving(false); }
+  };
+
+  const handleRemoveMember = async (deptId: string, userId: string) => {
+    if (!confirm("Remove this member from the department?")) return;
+    try {
+        const res = await fetch(`${API_BASE}/departments/${deptId}/remove-member/${userId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) {
+            showSuccess("Member removed!");
+            setRefresh(p => p + 1);
+            closeModal();
+        } else throw new Error(data.message);
+    } catch (err: unknown) {
+        showError(err instanceof Error ? err.message : "Failed to remove");
+    }
+};
+  const handleUpdateAccessMatrix = async () => {
+    if (!selected) return;
+    setIsSaving(true);
+    try {
+      const res  = await fetch(`${API_BASE}/departments/${selected._id}/access-matrix`, { method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ allowedDepartments: accessDeptIds }) });
+      const data = await res.json();
+      if (data.success) { showSuccess("Access matrix updated!"); setRefresh(p => p + 1); closeModal(); }
       else throw new Error(data.message);
     } catch (err: unknown) { showError(err instanceof Error ? err.message : "Failed"); }
     finally { setIsSaving(false); }
@@ -165,6 +210,14 @@ export default function DepartmentsPage() {
     d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const availableMembers = orgMembers.filter(m => {
+    const alreadyIn = selected?.members.some(dm => dm._id === m._id);
+    if (alreadyIn) return false;
+    if (!memberSearch) return true;
+    return m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+           m.email.toLowerCase().includes(memberSearch.toLowerCase());
+  });
 
   return (
     <DashboardLayout title="Departments" subtitle="Manage your organization's departments and teams">
@@ -185,10 +238,10 @@ export default function DepartmentsPage() {
       {/* Stats */}
       <div style={{ display: "flex", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
         {[
-          { label: "Total Departments", value: departments.length,                                              color: "#3b82f6" },
-          { label: "Total Members",     value: departments.reduce((s, d) => s + d.members.length, 0),          color: "#10b981" },
-          { label: "From Templates",    value: departments.filter(d => d.isFromTemplate).length,               color: "#a855f7" },
-          { label: "Custom",            value: departments.filter(d => !d.isFromTemplate).length,              color: "#f59e0b" },
+          { label: "Total Departments", value: departments.length,                                     color: "#3b82f6" },
+          { label: "Total Members",     value: departments.reduce((s, d) => s + d.members.length, 0), color: "#10b981" },
+          { label: "From Templates",    value: departments.filter(d => d.isFromTemplate).length,      color: "#a855f7" },
+          { label: "Custom",            value: departments.filter(d => !d.isFromTemplate).length,     color: "#f59e0b" },
         ].map((s) => (
           <div key={s.label} style={{ padding: "12px 20px", borderRadius: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "20px", fontWeight: "700", color: s.color }}>{s.value}</span>
@@ -214,8 +267,6 @@ export default function DepartmentsPage() {
             const visStyle = getVisibilityStyle(dept.permissions.documentVisibility);
             return (
               <div key={dept._id} style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", display: "flex", flexDirection: "column", gap: "14px" }}>
-
-                {/* Header */}
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
                   <div style={{ fontSize: "32px", lineHeight: 1 }}>{dept.icon}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -240,7 +291,6 @@ export default function DepartmentsPage() {
                   </div>
                 )}
 
-                {/* Members */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                     <span style={{ fontSize: "12px", color: "var(--color-text-muted)", fontWeight: "600" }}>MEMBERS ({dept.members.length})</span>
@@ -269,8 +319,28 @@ export default function DepartmentsPage() {
                   )}
                 </div>
 
+                {/* Cross-access badge */}
+                {dept.permissions.canAccessDepartments.length > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 10px", borderRadius: "7px", background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.15)" }}>
+                    <span style={{ fontSize: "11px" }}>🔗</span>
+                    <span style={{ fontSize: "11px", color: "#a855f7", fontWeight: "600" }}>
+                      Cross-access: {dept.permissions.canAccessDepartments.length} dept{dept.permissions.canAccessDepartments.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
+
                 <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
                   <button onClick={() => { setSelected(dept); setModal("view"); }} style={{ flex: 1, padding: "8px", borderRadius: "8px", background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>View Details</button>
+                  <button
+                    onClick={() => {
+                      setSelected(dept);
+                      setAccessDeptIds(dept.permissions.canAccessDepartments as unknown as string[]);
+                      setModal("access-matrix");
+                    }}
+                    style={{ flex: 1, padding: "8px", borderRadius: "8px", background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", color: "#a855f7", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                  >
+                    Access Matrix
+                  </button>
                 </div>
               </div>
             );
@@ -356,18 +426,28 @@ export default function DepartmentsPage() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {selected.members.map((m) => {
-                const rs = getRoleBadgeStyle(m.role);
-                return (
-                  <div key={m._id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
-                    <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: "#fff" }}>{m.name?.[0]?.toUpperCase()}</div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: "13px", fontWeight: "600" }}>{m.name}</p>
-                      <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{m.email}</p>
-                    </div>
-                    <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "5px", fontWeight: "600", background: rs.bg, color: rs.color }}>{m.role.replace("_", " ")}</span>
-                  </div>
-                );
-              })}
+    const rs = getRoleBadgeStyle(m.role);
+    return (
+        <div key={m._id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
+            <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: "#fff" }}>
+                {m.name?.[0]?.toUpperCase()}
+            </div>
+            <div style={{ flex: 1 }}>
+                <p style={{ fontSize: "13px", fontWeight: "600" }}>{m.name}</p>
+                <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{m.email}</p>
+            </div>
+            <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "5px", fontWeight: "600", background: rs.bg, color: rs.color }}>
+                {m.role.replace("_", " ")}
+            </span>
+            <button
+                onClick={() => handleRemoveMember(selected._id, m._id)}
+                style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: "11px", cursor: "pointer", flexShrink: 0 }}
+            >
+                Remove
+            </button>
+        </div>
+    );
+})}
             </div>
           )}
           <button onClick={closeModal} style={{ width: "100%", marginTop: "20px", padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Close</button>
@@ -378,14 +458,89 @@ export default function DepartmentsPage() {
       {modal === "add-member" && selected && (
         <Modal onClose={closeModal}>
           <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Add Member</h2>
-          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "24px" }}>Add a member to <strong>{selected.name}</strong></p>
-          <Field label="User ID">
-            <input value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} style={inputStyle} placeholder="Enter MongoDB user ID" />
-            <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "4px" }}>Team page (coming soon) will make this easier with a user search.</p>
+          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "20px" }}>Add a member to <strong>{selected.name}</strong></p>
+          <Field label="Search Members">
+            <input value={memberSearch} onChange={(e) => { setMemberSearch(e.target.value); setSelectedUserId(""); }} style={inputStyle} placeholder="Search by name or email..." autoFocus />
           </Field>
+          <div style={{ maxHeight: "260px", overflowY: "auto", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            {availableMembers.length === 0 ? (
+              <div style={{ padding: "20px", textAlign: "center", opacity: 0.5 }}>
+                <p style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>{memberSearch ? "No members match your search" : "All org members are already in this department"}</p>
+              </div>
+            ) : (
+              availableMembers.map((m) => {
+                const rs = getRoleBadgeStyle(m.role);
+                const isSelected = selectedUserId === m._id;
+                return (
+                  <div key={m._id} onClick={() => setSelectedUserId(m._id)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", border: isSelected ? "2px solid #3b82f6" : "1px solid var(--color-border)", background: isSelected ? "rgba(59,130,246,0.08)" : "rgba(255,255,255,0.02)", transition: "all 0.15s ease" }}>
+                    <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "700", color: "#fff", flexShrink: 0 }}>{m.name?.[0]?.toUpperCase()}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: "13px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.name}</p>
+                      <p style={{ fontSize: "11px", color: "var(--color-text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.email}</p>
+                      {m.department && <p style={{ fontSize: "10px", color: "#f59e0b", marginTop: "2px" }}>Currently in: {m.department.name}</p>}
+                    </div>
+                    <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "5px", fontWeight: "600", background: rs.bg, color: rs.color, whiteSpace: "nowrap" }}>{m.role.replace("_", " ")}</span>
+                    {isSelected && <span style={{ color: "#3b82f6", fontSize: "16px" }}>✓</span>}
+                  </div>
+                );
+              })
+            )}
+          </div>
+          {selectedUserId && (
+            <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: "16px" }}>
+              <p style={{ fontSize: "12px", color: "#10b981" }}>✓ Selected: <strong>{orgMembers.find(m => m._id === selectedUserId)?.name}</strong></p>
+            </div>
+          )}
           <div style={{ display: "flex", gap: "10px" }}>
             <button onClick={closeModal} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
-            <button onClick={handleAddMember} disabled={isSaving} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Adding..." : "Add Member"}</button>
+            <button onClick={handleAddMember} disabled={isSaving || !selectedUserId} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Adding..." : "Add Member"}</button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal: Access Matrix */}
+      {modal === "access-matrix" && selected && (
+        <Modal onClose={closeModal}>
+          <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Cross-Department Access</h2>
+          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "20px" }}>
+            Members of <strong>{selected.name}</strong> can also read documents from:
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px", maxHeight: "300px", overflowY: "auto" }}>
+            {departments.filter(d => d._id !== selected._id).length === 0 ? (
+              <p style={{ fontSize: "13px", color: "var(--color-text-muted)", opacity: 0.5, textAlign: "center", padding: "20px" }}>No other departments yet</p>
+            ) : (
+              departments.filter(d => d._id !== selected._id).map(d => {
+                const isChecked = accessDeptIds.includes(d._id);
+                return (
+                  <div
+                    key={d._id}
+                    onClick={() => setAccessDeptIds(prev => isChecked ? prev.filter(id => id !== d._id) : [...prev, d._id])}
+                    style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px", borderRadius: "10px", cursor: "pointer", border: isChecked ? "2px solid #a855f7" : "1px solid var(--color-border)", background: isChecked ? "rgba(168,85,247,0.08)" : "rgba(255,255,255,0.02)", transition: "all 0.15s ease" }}
+                  >
+                    <span style={{ fontSize: "20px" }}>{d.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: "13px", fontWeight: "600" }}>{d.name}</p>
+                      <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{d.code}</p>
+                    </div>
+                    <div style={{ width: "18px", height: "18px", borderRadius: "4px", border: isChecked ? "2px solid #a855f7" : "2px solid var(--color-border)", background: isChecked ? "#a855f7" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", color: "#fff", flexShrink: 0 }}>
+                      {isChecked && "✓"}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {accessDeptIds.length > 0 && (
+            <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", marginBottom: "16px" }}>
+              <p style={{ fontSize: "12px", color: "#a855f7" }}>✓ Access granted to {accessDeptIds.length} department{accessDeptIds.length > 1 ? "s" : ""}</p>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button onClick={closeModal} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
+            <button onClick={handleUpdateAccessMatrix} disabled={isSaving} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Saving..." : "Save Access"}</button>
           </div>
         </Modal>
       )}
