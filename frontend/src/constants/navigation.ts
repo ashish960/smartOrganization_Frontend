@@ -11,7 +11,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard",   icon: "Dashboard",   href: "/dashboard"                          },
   { label: "Documents",   icon: "Documents",   href: "/documents"      },
-  { label: "AI Chat",     icon: "AI",          href: "/coming-soon?feature=AI Chat"        },
+  { label: "AI Chat", icon: "AI", href: "/chat" },
   { label: "Departments", icon: "Department", href: "/departments" },
   { label: "Team", icon: "Users", href: "/team" },
   { label: "Analytics",   icon: "Analytics",   href: "/coming-soon?feature=Analytics"      },
