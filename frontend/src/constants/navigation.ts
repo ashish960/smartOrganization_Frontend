@@ -14,7 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "AI Chat", icon: "AI", href: "/chat" },
   { label: "Departments", icon: "Department", href: "/departments" },
   { label: "Team", icon: "Users", href: "/team" },
-  { label: "Analytics",   icon: "Analytics",   href: "/coming-soon?feature=Analytics"      },
+  { label: "Analytics", icon: "Analytics", href: "/analytics" },
   { label: "Settings",    icon: "Settings",    href: "/coming-soon?feature=Settings"       },
 ];
 
