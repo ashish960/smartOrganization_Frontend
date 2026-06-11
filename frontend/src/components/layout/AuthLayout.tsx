@@ -106,14 +106,14 @@ const AuthLayout = ({ children, title, subtitle, footerLink }: AuthLayoutProps) 
         </div>
 
         {/* Copyright */}
-        <div className="text-center mt-6">
-          <p
-            className="text-xs opacity-60"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            © 2024 SmartOrg AI. All rights reserved.
-          </p>
-        </div>
+<div className="text-center mt-6">
+  <p
+    className="text-xs opacity-60"
+    style={{ color: "var(--color-text-muted)" }}
+  >
+    © {new Date().getFullYear()} SmartOrg AI. All rights reserved.
+  </p>
+</div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Departments", icon: "Department", href: "/departments" },
   { label: "Team", icon: "Users", href: "/team" },
   { label: "Analytics", icon: "Analytics", href: "/analytics" },
-  { label: "Settings",    icon: "Settings",    href: "/coming-soon?feature=Settings"       },
+  { label: "Settings", icon: "Settings", href: "/settings" },
 ];
 
 export const QUICK_ACTIONS = [
