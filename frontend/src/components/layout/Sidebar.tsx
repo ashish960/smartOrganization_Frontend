@@ -21,52 +21,28 @@ export default function Sidebar({
   onLogout,
 }: SidebarProps) {
   const router = useRouter();
-  const pathname = usePathname(); // highlights active nav item automatically
+  const pathname = usePathname();
 
   return (
-    <aside style={{
-      width: isOpen ? "240px" : "68px",
-      minHeight: "100vh",
-      background: "var(--color-surface)",
-      borderRight: "1px solid var(--color-border)",
-      display: "flex",
-      flexDirection: "column",
-      transition: "width 0.25s ease",
-      overflow: "hidden",
-      flexShrink: 0,
-      position: "sticky",
-      top: 0,
-      height: "100vh",
-    }}>
-
+    <aside
+      className={`flex flex-col flex-shrink-0 sticky top-0 h-screen bg-surface border-r border-border transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
+        isOpen ? "w-64" : "w-[72px]"
+      }`}
+    >
       {/* ── Logo + Toggle ── */}
-      <div style={{
-        padding: "20px 16px",
-        borderBottom: "1px solid var(--color-border)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: isOpen ? "space-between" : "center",
-        gap: "10px",
-      }}>
+      <div
+        className={`flex items-center px-4 py-5 border-b border-border transition-all duration-300 ${
+          isOpen ? "justify-between" : "justify-center"
+        }`}
+      >
         {isOpen && (
-          <span style={{
-            fontSize: "16px",
-            fontWeight: "700",
-            background: "linear-gradient(135deg, #3b82f6, #a855f7)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            whiteSpace: "nowrap",
-          }}>
+          <span className="text-lg font-bold bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap tracking-tight">
             SmartOrg AI
           </span>
         )}
         <button
           onClick={onToggle}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            color: "var(--color-text-muted)", padding: "4px",
-            borderRadius: "6px", display: "flex", alignItems: "center", flexShrink: 0,
-          }}
+          className="flex items-center justify-center p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors flex-shrink-0"
         >
           {isOpen ? <Icons.ChevronLeft /> : <Icons.ChevronRight16 />}
         </button>
@@ -74,30 +50,18 @@ export default function Sidebar({
 
       {/* ── Org Badge ── */}
       {isOpen && (
-        <div style={{
-          margin: "12px 12px 4px",
-          padding: "10px 12px",
-          borderRadius: "10px",
-          background: "rgba(59,130,246,0.08)",
-          border: "1px solid rgba(59,130,246,0.15)",
-        }}>
-          <p style={{
-            fontSize: "10px", color: "rgba(59,130,246,0.8)", fontWeight: "600",
-            marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.05em",
-          }}>
+        <div className="mx-4 mt-4 mb-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+          <p className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">
             Organization
           </p>
-          <p style={{
-            fontSize: "13px", fontWeight: "600",
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          }}>
+          <p className="text-sm font-semibold truncate text-text-primary">
             {orgName}
           </p>
         </div>
       )}
 
       {/* ── Navigation ── */}
-      <nav style={{ flex: 1, padding: "8px", overflowY: "auto" }}>
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const IconComp = Icons[item.icon];
           const isActive = pathname === item.href;
@@ -107,58 +71,42 @@ export default function Sidebar({
               key={item.label}
               onClick={() => router.push(item.href)}
               title={!isOpen ? item.label : undefined}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: isOpen ? "9px 12px" : "9px",
-                justifyContent: isOpen ? "flex-start" : "center",
-                borderRadius: "8px",
-                border: "none",
-                cursor: "pointer",
-                marginBottom: "2px",
-                transition: "all 0.15s ease",
-                background: isActive
-                  ? "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15))"
-                  : "transparent",
-                color: isActive ? "var(--color-text)" : "var(--color-text-muted)",
-                fontWeight: isActive ? "600" : "400",
-                fontSize: "14px",
-                borderLeft: isActive ? "2px solid #3b82f6" : "2px solid transparent",
-              }}
+              className={`w-full flex items-center gap-3 rounded-lg border-l-2 transition-all duration-200 group ${
+                isOpen ? "justify-start px-3 py-2.5" : "justify-center p-2.5"
+              } ${
+                isActive
+                  ? "bg-primary/10 text-primary border-primary font-semibold"
+                  : "bg-transparent text-text-muted border-transparent hover:bg-surface-hover hover:text-text-primary font-medium"
+              }`}
             >
-              <span style={{ flexShrink: 0, opacity: isActive ? 1 : 0.6 }}>
+              <span
+                className={`flex-shrink-0 transition-transform duration-200 ${
+                  isActive ? "scale-110 opacity-100" : "opacity-70 group-hover:opacity-100 group-hover:scale-110"
+                }`}
+              >
                 <IconComp />
               </span>
-              {isOpen && <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>}
+              {isOpen && <span className="whitespace-nowrap">{item.label}</span>}
             </button>
           );
         })}
       </nav>
 
       {/* ── User + Logout ── */}
-      <div style={{ padding: "12px", borderTop: "1px solid var(--color-border)" }}>
+      <div className="p-4 border-t border-border">
         {isOpen ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Avatar name={userName} size={32} fontSize={13} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{
-                fontSize: "13px", fontWeight: "600",
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-              }}>
+          <div className="flex items-center gap-3">
+            <Avatar name={userName} size={36} fontSize={14} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate text-text-primary">
                 {userName}
               </p>
-              <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>ORG_ADMIN</p>
+              <p className="text-[11px] font-medium text-text-muted mt-0.5">ORG_ADMIN</p>
             </div>
             <button
               onClick={onLogout}
               title="Logout"
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                color: "var(--color-text-muted)", padding: "4px",
-                borderRadius: "6px", flexShrink: 0,
-              }}
+              className="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-error/10 transition-colors flex-shrink-0"
             >
               <Icons.Logout />
             </button>
@@ -167,11 +115,7 @@ export default function Sidebar({
           <button
             onClick={onLogout}
             title="Logout"
-            style={{
-              width: "100%", background: "none", border: "none", cursor: "pointer",
-              color: "var(--color-text-muted)", padding: "8px", borderRadius: "8px",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}
+            className="w-full flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-error hover:bg-error/10 transition-colors"
           >
             <Icons.Logout />
           </button>

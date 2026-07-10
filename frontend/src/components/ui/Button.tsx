@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "danger";
+  variant?: "primary" | "secondary" | "outline" | "danger" | "ghost";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   children: React.ReactNode;
@@ -22,39 +22,33 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     // Base styles (always applied)
     const baseStyles =
-      "font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+      "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
     // Variant styles (colors)
     const variantStyles = {
       primary:
-         "text-white font-semibold transition-all duration-200",
+        "bg-gradient-to-br from-primary to-secondary hover:brightness-110 text-white shadow-glow hover:shadow-[0_0_25px_hsl(var(--primary)/0.5)] border border-white/10",
       secondary:
-        "bg-secondary-600 hover:bg-secondary-700 text-white dark:bg-secondary-500 dark:hover:bg-secondary-600",
+        "bg-surface-hover hover:bg-border text-text-primary border border-border hover:border-text-muted shadow-sm",
       outline:
-        "border-2 border-primary-600 text-primary-600 hover:bg-primary-50 dark:border-primary-500 dark:text-primary-400 dark:hover:bg-primary-950",
+        "border-2 border-primary text-primary hover:bg-primary/10",
       danger:
-        "bg-error-600 hover:bg-error-700 text-white dark:bg-error-500 dark:hover:bg-error-600",
+        "bg-error/10 hover:bg-error/20 text-error border border-error/20 hover:border-error/40",
+      ghost:
+        "bg-transparent text-text-muted hover:text-text-primary hover:bg-surface-hover",
     };
 
     // Size styles (responsive)
     const sizeStyles = {
-      sm: "px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm lg:px-5 lg:py-2.5",
-      md: "px-4 py-2 text-sm md:px-6 md:py-2.5 md:text-base lg:px-8 lg:py-3",
-      lg: "px-6 py-3 text-base md:px-8 md:py-3.5 md:text-lg lg:px-10 lg:py-4",
+      sm: "px-3 py-1.5 text-xs md:text-sm",
+      md: "px-4 py-2 text-sm md:px-5 md:py-2.5",
+      lg: "px-6 py-3 text-base md:px-8 md:py-3.5",
     };
 
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        style={
-    variant === "primary"
-      ? {
-          background: "linear-gradient(135deg, #3b82f6, #a855f7)",
-          boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)",
-        }
-      : {}
-  }
         className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
         {...props}
       >

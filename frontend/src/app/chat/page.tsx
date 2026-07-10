@@ -150,74 +150,52 @@ function ScopeSelector({
     d.originalName.toLowerCase().includes(docSearch.toLowerCase())
   );
 
-  // Count docs per department
   const docCountByDept = (deptId: string) =>
     documents.filter(d => d.department?._id === deptId).length;
 
-  const pillStyle = (active: boolean): React.CSSProperties => ({
-    display: "flex", alignItems: "center", gap: "6px",
-    padding: "5px 10px", borderRadius: "20px", fontSize: "12px",
-    cursor: "pointer", transition: "all 0.15s ease", userSelect: "none",
-    background: active ? "rgba(59,130,246,0.2)" : "rgba(255,255,255,0.05)",
-    border: active ? "1px solid rgba(59,130,246,0.4)" : "1px solid rgba(255,255,255,0.08)",
-    color: active ? "rgba(147,197,253,1)" : "rgba(255,255,255,0.5)",
-    fontWeight: active ? "500" : "400",
-    position: "relative",
-  });
-
-  const countBadgeStyle: React.CSSProperties = {
-    fontSize: "10px",
-    opacity: 0.7,
-    background: "rgba(255,255,255,0.1)",
-    borderRadius: "10px",
-    padding: "1px 6px",
-  };
+  const pillClass = (active: boolean) =>
+    `flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs cursor-pointer transition-all select-none ${
+      active
+        ? "bg-primary/20 border border-primary/40 text-primary font-medium shadow-sm"
+        : "bg-surface border border-border text-text-muted hover:text-text-primary hover:bg-surface-hover hover:border-text-muted/30"
+    }`;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "rgba(255,255,255,0.3)", fontSize: "11px" }}>
+    <div className="flex items-center gap-2 mb-3 flex-wrap">
+      <div className="flex items-center gap-1.5 text-text-muted text-[11px] font-bold tracking-wider mr-1">
         <ScopeIcon />
-        <span style={{ fontWeight: "500", letterSpacing: "0.04em" }}>SCOPE</span>
+        <span>SCOPE</span>
       </div>
 
-      {/* All Documents */}
       <div
-        style={pillStyle(scope.type === "all")}
+        className={pillClass(scope.type === "all")}
         onClick={() => { onScopeChange({ type: "all", label: "All Documents" }); setShowDeptDropdown(false); setShowDocDropdown(false); }}
       >
         All Documents
-        <span style={countBadgeStyle}>{documents.length}</span>
+        <span className="text-[10px] opacity-70 bg-border px-1.5 py-0.5 rounded-md text-text-primary">{documents.length}</span>
       </div>
 
-      {/* Department scope */}
-      <div style={{ position: "relative" }}>
+      <div className="relative">
         <div
-          style={pillStyle(scope.type === "department")}
+          className={pillClass(scope.type === "department")}
           onClick={() => { setShowDeptDropdown(p => !p); setShowDocDropdown(false); }}
         >
           {scope.type === "department" ? scope.label : "Department"}
           <ChevronIcon />
         </div>
         {showDeptDropdown && (
-          <div style={{
-            position: "absolute", bottom: "calc(100% + 8px)", left: 0, zIndex: 50,
-            background: "#161622", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "10px", padding: "6px", minWidth: "220px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-          }}>
+          <div className="absolute bottom-full mb-2 left-0 z-50 bg-surface/95 backdrop-blur-md border border-border rounded-xl p-1.5 min-w-[220px] shadow-lg">
             {departments.length === 0 ? (
-              <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)", padding: "8px 10px" }}>No departments</p>
+              <p className="text-xs text-text-muted px-2.5 py-2">No departments</p>
             ) : departments.map(d => {
               const count = docCountByDept(d._id);
               return (
                 <div key={d._id} onClick={() => { onScopeChange({ type: "department", departmentId: d._id, label: `${d.icon} ${d.name}` }); setShowDeptDropdown(false); }}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", color: "rgba(255,255,255,0.8)", transition: "background 0.1s" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  className="flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer text-sm text-text-primary hover:bg-surface-hover transition-colors"
                 >
                   <span>{d.icon}</span>
-                  <span style={{ flex: 1 }}>{d.name}</span>
-                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.07)", borderRadius: "10px", padding: "1px 7px", flexShrink: 0 }}>
+                  <span className="flex-1 font-medium">{d.name}</span>
+                  <span className="text-[10px] text-text-muted bg-border px-2 py-0.5 rounded-md flex-shrink-0">
                     {count} {count === 1 ? "doc" : "docs"}
                   </span>
                 </div>
@@ -227,45 +205,37 @@ function ScopeSelector({
         )}
       </div>
 
-      {/* Specific document scope */}
-      <div style={{ position: "relative" }}>
+      <div className="relative">
         <div
-          style={pillStyle(scope.type === "document")}
+          className={pillClass(scope.type === "document")}
           onClick={() => { setShowDocDropdown(p => !p); setShowDeptDropdown(false); }}
         >
           {scope.type === "document" ? (
-            <span style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{scope.label}</span>
+            <span className="max-w-[120px] truncate">{scope.label}</span>
           ) : "Specific Document"}
           <ChevronIcon />
         </div>
         {showDocDropdown && (
-          <div style={{
-            position: "absolute", bottom: "calc(100% + 8px)", left: 0, zIndex: 50,
-            background: "#161622", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "10px", padding: "6px", width: "280px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-          }}>
+          <div className="absolute bottom-full mb-2 left-0 z-50 bg-surface/95 backdrop-blur-md border border-border rounded-xl p-1.5 w-[280px] shadow-lg">
             <input
               value={docSearch} onChange={(e) => setDocSearch(e.target.value)}
               placeholder="Search documents..." autoFocus
-              style={{ width: "100%", padding: "7px 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px", color: "rgba(255,255,255,0.8)", fontSize: "12px", outline: "none", boxSizing: "border-box", marginBottom: "4px" }}
+              className="w-full px-3 py-2 mb-1 bg-surface-hover border border-border rounded-lg text-text-primary text-xs outline-none focus:border-primary/50 transition-colors"
             />
-            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+            <div className="max-h-[200px] overflow-y-auto">
               {filteredDocs.length === 0 ? (
-                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)", padding: "8px 10px" }}>No documents found</p>
+                <p className="text-xs text-text-muted px-2.5 py-2">No documents found</p>
               ) : filteredDocs.map(d => (
                 <div key={d._id}
                   onClick={() => { onScopeChange({ type: "document", documentId: d._id, label: d.originalName }); setShowDocDropdown(false); setDocSearch(""); }}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", borderRadius: "6px", cursor: "pointer", transition: "background 0.1s" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  className="flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-colors hover:bg-surface-hover"
                 >
-                  <span style={{ color: "rgba(255,255,255,0.4)", flexShrink: 0 }}><FileIcon /></span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.originalName}</p>
-                    {d.department && <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>{d.department.name}</p>}
+                  <span className="text-text-muted flex-shrink-0"><FileIcon /></span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-text-primary truncate">{d.originalName}</p>
+                    {d.department && <p className="text-[10px] text-text-muted truncate">{d.department.name}</p>}
                   </div>
-                  <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }}>{d.fileType.toUpperCase()}</span>
+                  <span className="text-[10px] text-text-muted flex-shrink-0 uppercase font-medium">{d.fileType}</span>
                 </div>
               ))}
             </div>
@@ -273,12 +243,10 @@ function ScopeSelector({
         )}
       </div>
 
-      {/* Active scope badge */}
       {scope.type !== "all" && (
-        <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 8px", borderRadius: "20px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", fontSize: "11px", color: "rgba(16,185,129,0.8)" }}>
+        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-success/10 border border-success/20 text-[11px] text-success font-medium">
           Scoped search active
-          <button onClick={() => onScopeChange({ type: "all", label: "All Documents" })}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(16,185,129,0.6)", fontSize: "14px", lineHeight: 1, padding: "0 0 0 2px" }}>×</button>
+          <button onClick={() => onScopeChange({ type: "all", label: "All Documents" })} className="ml-1 opacity-70 hover:opacity-100 focus:outline-none">×</button>
         </div>
       )}
     </div>
@@ -287,7 +255,8 @@ function ScopeSelector({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function ChatPage() {
-  const { token } = useSelector((state: AppRootState) => state.auth);
+  const { token, user } = useSelector((state: AppRootState) => state.auth);
+  const isDemo = user?.email && user.email !== "owner@smartorg.com";
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef       = useRef<HTMLTextAreaElement>(null);
 
@@ -323,7 +292,7 @@ export default function ChatPage() {
     finally { setSessionsLoading(false); }
   }, [token]);
 
-  useEffect(() => { loadSessions(); }, [loadSessions]);
+  useEffect(() => { if (token) loadSessions(); }, [loadSessions, token]);
 
   const selectSession = async (sessionId: string) => {
     try {
@@ -333,7 +302,7 @@ export default function ChatPage() {
         setActiveSession(data.data);
         setMessages(data.data.messages);
         setError(null);
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "auto" }), 100);
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
       }
     } catch { setError("Failed to load session"); }
   };
@@ -445,27 +414,25 @@ export default function ChatPage() {
     <div key={session._id} onClick={() => selectSession(session._id)}
       onMouseEnter={() => setHoveredSession(session._id)}
       onMouseLeave={() => setHoveredSession(null)}
-      style={{ padding: "8px 10px", borderRadius: "8px", cursor: "pointer", marginBottom: "1px", display: "flex", alignItems: "center", gap: "8px", background: activeSession?._id === session._id ? "rgba(255,255,255,0.08)" : hoveredSession === session._id ? "rgba(255,255,255,0.04)" : "transparent", transition: "background 0.15s ease" }}
+      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${activeSession?._id === session._id ? "bg-surface border-border shadow-sm" : hoveredSession === session._id ? "bg-surface-hover" : "bg-transparent"}`}
     >
-      <span style={{ color: "rgba(255,255,255,0.35)", flexShrink: 0 }}><ChatIcon /></span>
+      <span className="text-text-muted flex-shrink-0"><ChatIcon /></span>
       {editingTitle === session._id ? (
         <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
           onBlur={() => handleRename(session._id)}
           onKeyDown={(e) => { if (e.key === "Enter") handleRename(session._id); if (e.key === "Escape") setEditingTitle(null); }}
           onClick={(e) => e.stopPropagation()} autoFocus
-          style={{ flex: 1, background: "none", border: "none", outline: "none", color: "var(--color-text)", fontSize: "13px", padding: 0 }}
+          className="flex-1 bg-transparent border-none outline-none text-text-primary text-sm p-0 m-0"
         />
       ) : (
-        <span style={{ flex: 1, fontSize: "13px", color: activeSession?._id === session._id ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span className={`flex-1 text-sm truncate ${activeSession?._id === session._id ? "text-text-primary font-medium" : "text-text-muted"}`}>
           {session.title}
         </span>
       )}
       {(hoveredSession === session._id || activeSession?._id === session._id) && editingTitle !== session._id && (
-        <div style={{ display: "flex", gap: "2px", flexShrink: 0 }}>
-          <button onClick={(e) => { e.stopPropagation(); setEditingTitle(session._id); setNewTitle(session.title); }}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", padding: "3px", borderRadius: "4px", display: "flex", alignItems: "center" }}><EditIcon /></button>
-          <button onClick={(e) => deleteSession(session._id, e)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(239,68,68,0.6)", padding: "3px", borderRadius: "4px", display: "flex", alignItems: "center" }}><TrashIcon /></button>
+        <div className="flex gap-1 flex-shrink-0">
+          <button onClick={(e) => { e.stopPropagation(); setEditingTitle(session._id); setNewTitle(session.title); }} className="p-1 rounded bg-transparent hover:bg-border text-text-muted transition-colors"><EditIcon /></button>
+          <button onClick={(e) => deleteSession(session._id, e)} className="p-1 rounded bg-transparent hover:bg-error/10 text-error/70 transition-colors"><TrashIcon /></button>
         </div>
       )}
     </div>
@@ -473,95 +440,95 @@ export default function ChatPage() {
 
   return (
     <DashboardLayout title="AI Chat" subtitle="Ask questions about your organization's documents">
-      <div style={{ display: "flex", height: "calc(100vh - 140px)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", background: "#0d0d14" }}>
+      <div className="flex h-[calc(100vh-140px)] rounded-2xl border border-border overflow-hidden bg-background shadow-sm">
 
         {/* Sidebar */}
-        <div style={{ width: "256px", flexShrink: 0, borderRight: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", background: "#0a0a12" }}>
-          <div style={{ padding: "12px" }}>
-            <button onClick={createNewSession} style={{ width: "100%", padding: "9px 14px", borderRadius: "8px", fontSize: "13px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)", cursor: "pointer", fontWeight: "500", display: "flex", alignItems: "center", gap: "8px", transition: "all 0.15s ease" }}>
-              <PlusIcon />New conversation
+        <div className="w-64 flex-shrink-0 border-r border-border flex flex-col bg-surface/50 backdrop-blur-sm">
+          <div className="p-3">
+            <button onClick={createNewSession} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-surface hover:bg-surface-hover border border-border text-text-primary shadow-sm transition-all hover:border-primary/30">
+              <PlusIcon /> New conversation
             </button>
           </div>
-          <div style={{ flex: 1, overflowY: "auto", padding: "0 8px 8px" }}>
+          <div className="flex-1 overflow-y-auto p-2">
             {sessionsLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "24px" }}>
-                <div style={{ width: "18px", height: "18px", borderRadius: "50%", border: "2px solid rgba(255,255,255,0.08)", borderTop: "2px solid rgba(255,255,255,0.4)", animation: "spin 0.8s linear infinite" }}/>
+              <div className="flex justify-center p-6 opacity-50">
+                <div className="w-5 h-5 rounded-full border-2 border-border border-t-text-muted animate-spin"/>
               </div>
             ) : sessions.length === 0 ? (
-              <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", textAlign: "center", padding: "24px 12px" }}>No conversations yet</p>
+              <p className="text-xs text-text-muted text-center p-6">No conversations yet</p>
             ) : (
               <>
-                {todaySessions.length > 0 && (<><p style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "600", padding: "8px 10px 4px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Today</p>{todaySessions.map(renderSession)}</>)}
-                {yesterdaySessions.length > 0 && (<><p style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "600", padding: "8px 10px 4px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Yesterday</p>{yesterdaySessions.map(renderSession)}</>)}
-                {olderSessions.length > 0 && (<><p style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "600", padding: "8px 10px 4px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Older</p>{olderSessions.map(renderSession)}</>)}
+                {todaySessions.length > 0 && (<><p className="text-[10px] text-text-muted font-bold px-2.5 py-1.5 uppercase tracking-wider">Today</p>{todaySessions.map(renderSession)}</>)}
+                {yesterdaySessions.length > 0 && (<><p className="text-[10px] text-text-muted font-bold px-2.5 py-1.5 uppercase tracking-wider">Yesterday</p>{yesterdaySessions.map(renderSession)}</>)}
+                {olderSessions.length > 0 && (<><p className="text-[10px] text-text-muted font-bold px-2.5 py-1.5 uppercase tracking-wider">Older</p>{olderSessions.map(renderSession)}</>)}
               </>
             )}
           </div>
         </div>
 
         {/* Main */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, background: "#0d0d14" }}>
+        <div className="flex-1 flex flex-col min-w-0 bg-background relative">
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "32px 0" }}>
+          <div className="flex-1 overflow-y-auto p-6 md:p-8">
             {messages.length === 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "32px", padding: "0 20px" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-                  <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div className="flex flex-col items-center justify-center h-full gap-8 px-5">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-md">
                     <BotIcon />
                   </div>
-                  <div style={{ textAlign: "center" }}>
-                    <h2 style={{ fontSize: "22px", fontWeight: "600", marginBottom: "6px", color: "rgba(255,255,255,0.9)" }}>How can I help you today?</h2>
-                    <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>Search through your organization&apos;s documents with AI</p>
+                  <div>
+                    <h2 className="text-2xl font-bold text-text-primary tracking-tight mb-2">How can I help you today?</h2>
+                    <p className="text-text-muted">Search through your organization&apos;s documents with AI</p>
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", maxWidth: "580px" }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-[600px]">
                   {SUGGESTIONS.map(s => (
-                    <button key={s} onClick={() => handleSend(s)} style={{ padding: "14px 16px", borderRadius: "10px", textAlign: "left", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", fontSize: "13px", cursor: "pointer", transition: "all 0.15s ease", lineHeight: 1.5 }}>
+                    <button key={s} onClick={() => handleSend(s)} className="p-4 rounded-xl text-left bg-surface/50 border border-border text-text-muted text-sm cursor-pointer hover:bg-surface-hover hover:border-primary/30 hover:text-text-primary transition-all shadow-sm">
                       {s}
                     </button>
                   ))}
                 </div>
               </div>
             ) : (
-              <div style={{ maxWidth: "720px", margin: "0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: "28px" }}>
+              <div className="max-w-[760px] mx-auto flex flex-col gap-7 pb-4">
                 {messages.map((msg, i) => (
-                  <div key={i} style={{ display: "flex", gap: "14px", alignItems: "flex-start", flexDirection: msg.role === "user" ? "row-reverse" : "row" }}>
-                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0, background: msg.role === "user" ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "rgba(255,255,255,0.06)", border: msg.role === "assistant" ? "1px solid rgba(255,255,255,0.1)" : "none", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div key={i} className={`flex gap-4 items-start ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                    <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm ${msg.role === "user" ? "bg-gradient-to-br from-primary to-secondary text-white" : "bg-surface border border-border text-text-primary"}`}>
                       {msg.role === "user" ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       ) : (
-                        <div style={{ color: "rgba(255,255,255,0.7)" }}><BotIcon /></div>
+                        <BotIcon />
                       )}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "8px", alignItems: msg.role === "user" ? "flex-end" : "flex-start" }}>
-                      <div style={{ padding: "12px 16px", borderRadius: msg.role === "user" ? "18px 4px 18px 18px" : "4px 18px 18px 18px", background: msg.role === "user" ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "rgba(255,255,255,0.05)", border: msg.role === "assistant" ? "1px solid rgba(255,255,255,0.07)" : "none", fontSize: "14px", lineHeight: "1.7", color: "rgba(255,255,255,0.9)", whiteSpace: "pre-wrap", maxWidth: "100%" }}>
+                    <div className={`flex-1 min-w-0 flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                      <div className={`px-5 py-3.5 text-[15px] leading-relaxed whitespace-pre-wrap max-w-full shadow-sm ${msg.role === "user" ? "rounded-[20px_6px_20px_20px] bg-gradient-to-br from-primary to-primary-hover text-white shadow-primary/20" : "rounded-[6px_20px_20px_20px] bg-surface border border-border text-text-primary"}`}>
                         {msg.isLoading ? (
-                          <div style={{ display: "flex", gap: "5px", alignItems: "center", padding: "2px 0" }}>
-                            {[0,1,2].map(j => <div key={j} style={{ width: "5px", height: "5px", borderRadius: "50%", background: "rgba(255,255,255,0.5)", animation: `bounce 1.2s ease infinite ${j * 0.2}s` }}/>)}
+                          <div className="flex gap-1.5 items-center py-1 px-1">
+                            {[0,1,2].map(j => <div key={j} className="w-1.5 h-1.5 rounded-full bg-text-muted animate-bounce" style={{ animationDelay: `${j * 0.15}s` }}/>)}
                           </div>
                         ) : msg.content}
                       </div>
                       {msg.sources && msg.sources.length > 0 && (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                        <div className="flex flex-wrap gap-2 mt-1">
                           {msg.sources.map((src, j) => (
-                            <span key={j} style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "20px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", color: "rgba(16,185,129,0.9)", fontWeight: "500" }}>
-                              Source {j+1} · p.{src.page + 1} · {Math.round(src.relevance * 100)}%
+                            <span key={j} className="text-xs px-2.5 py-1 rounded-lg bg-success/10 border border-success/20 text-success font-medium flex items-center gap-1.5">
+                              <FileIcon /> Source {j+1} · p.{src.page + 1} · {Math.round(src.relevance * 100)}%
                             </span>
                           ))}
                         </div>
                       )}
                       {msg.createdAt && !msg.isLoading && (
-                        <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)" }}>{formatTime(msg.createdAt)}</p>
+                        <p className="text-[11px] text-text-muted">{formatTime(msg.createdAt)}</p>
                       )}
                     </div>
                   </div>
                 ))}
                 {error && (
-                  <div style={{ padding: "12px 16px", borderRadius: "10px", fontSize: "13px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", color: "rgba(239,68,68,0.9)", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  <div className="px-4 py-3 rounded-xl text-sm bg-error/10 border border-error/20 text-error flex items-center gap-3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     {error}
-                    <button onClick={() => setError(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "rgba(239,68,68,0.7)", fontSize: "16px", lineHeight: 1 }}>×</button>
+                    <button onClick={() => setError(null)} className="ml-auto bg-transparent border-none text-error/70 hover:text-error text-lg leading-none p-1">×</button>
                   </div>
                 )}
                 <div ref={messagesEndRef}/>
@@ -570,34 +537,34 @@ export default function ChatPage() {
           </div>
 
           {/* Input area */}
-          <div style={{ padding: "12px 24px 20px", background: "#0d0d14" }}>
-            <div style={{ maxWidth: "720px", margin: "0 auto" }}>
+          <div className="p-4 md:px-8 pb-6 bg-gradient-to-t from-background via-background to-transparent relative z-10 pt-10 mt-auto">
+            <div className="max-w-[760px] mx-auto">
+              
+              {isDemo && (
+                <div className="mb-3 px-4 py-2.5 rounded-xl bg-warning/10 border border-warning/20 text-warning text-xs font-semibold text-center select-none animate-fade-in shadow-sm">
+                  ⚠️ Demo Mode Active: You are restricted to a total of 3 AI messages to prevent token abuse.
+                </div>
+              )}
 
-              {/* Scope selector */}
-              <ScopeSelector
-                scope={scope}
-                departments={departments}
-                documents={documents}
-                onScopeChange={setScope}
-              />
+              <ScopeSelector scope={scope} departments={departments} documents={documents} onScopeChange={setScope} />
 
-              {/* Input box */}
-              <div style={{ display: "flex", alignItems: "flex-end", gap: "10px", padding: "12px 16px", borderRadius: "14px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", transition: "border-color 0.2s ease" }}>
+              <div className="flex items-end gap-3 p-3 rounded-2xl bg-surface border border-border shadow-lg transition-colors focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
                 <textarea
                   ref={inputRef} value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Message SmartOrg AI..."
                   disabled={isLoading} rows={1}
-                  style={{ flex: 1, background: "none", border: "none", outline: "none", color: "rgba(255,255,255,0.9)", fontSize: "14px", resize: "none", lineHeight: "1.6", maxHeight: "160px", overflowY: "auto", fontFamily: "inherit" }}
+                  className="flex-1 bg-transparent border-none outline-none text-text-primary text-[15px] resize-none leading-relaxed max-h-[160px] overflow-y-auto px-2 py-1 placeholder:text-text-muted"
                   onInput={(e) => { const el = e.target as HTMLTextAreaElement; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 160) + "px"; }}
                 />
-                <button onClick={() => handleSend()} disabled={isLoading || !input.trim()} style={{ width: "34px", height: "34px", borderRadius: "8px", flexShrink: 0, background: input.trim() && !isLoading ? "linear-gradient(135deg, #3b82f6, #6366f1)" : "rgba(255,255,255,0.07)", border: "none", cursor: input.trim() && !isLoading ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", color: input.trim() && !isLoading ? "#fff" : "rgba(255,255,255,0.25)", transition: "all 0.2s ease" }}>
-                  {isLoading ? <div style={{ width: "14px", height: "14px", borderRadius: "50%", border: "2px solid rgba(255,255,255,0.2)", borderTop: "2px solid rgba(255,255,255,0.7)", animation: "spin 0.8s linear infinite" }}/> : <SendIcon />}
+                <button onClick={() => handleSend()} disabled={isLoading || !input.trim()} 
+                  className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center transition-all ${input.trim() && !isLoading ? "bg-gradient-to-br from-primary to-secondary text-white shadow-md hover:shadow-lg" : "bg-surface-hover text-text-muted cursor-not-allowed"}`}>
+                  {isLoading ? <div className="w-4 h-4 rounded-full border-2 border-border border-t-white animate-spin"/> : <SendIcon />}
                 </button>
               </div>
 
-              <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", textAlign: "center", marginTop: "10px" }}>
+              <p className="text-[11px] text-text-muted text-center mt-3 font-medium">
                 {scope.type !== "all"
                   ? `Searching within: ${scope.label} · Press Enter to send`
                   : "SmartOrg AI searches only documents you have access to · Press Enter to send"
@@ -607,15 +574,6 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes spin   { to { transform: rotate(360deg); } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        textarea::placeholder { color: rgba(255,255,255,0.25) !important; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
-      `}</style>
     </DashboardLayout>
   );
 }

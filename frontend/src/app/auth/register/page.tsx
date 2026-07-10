@@ -229,82 +229,41 @@ export default function RegisterPage() {
       }}
     >
       {/* ── Step Indicator ── */}
-      <div style={{ marginBottom: "24px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            marginBottom: "8px",
-          }}
-        >
+      <div className="mb-6">
+        <div className="flex items-center justify-center gap-2 mb-2">
           {/* Step 1 dot */}
           <div
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: "600",
-              background:
-                step >= 1
-                  ? "var(--gradient-primary, linear-gradient(135deg, #3b82f6, #a855f7))"
-                  : "rgba(255,255,255,0.1)",
-              color: "#fff",
-              transition: "all 0.3s ease",
-            }}
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ${
+              step >= 1
+                ? "bg-gradient-to-br from-primary to-secondary"
+                : "bg-surface-hover"
+            }`}
           >
             {step > 1 ? "✓" : "1"}
           </div>
 
           {/* Connector line */}
           <div
-            style={{
-              height: "2px",
-              width: "80px",
-              borderRadius: "2px",
-              background:
-                step > 1
-                  ? "var(--gradient-primary, linear-gradient(135deg, #3b82f6, #a855f7))"
-                  : "rgba(255,255,255,0.1)",
-              transition: "background 0.3s ease",
-            }}
+            className={`h-0.5 w-20 rounded-sm transition-all duration-300 ${
+              step > 1
+                ? "bg-gradient-to-r from-primary to-secondary"
+                : "bg-surface-hover"
+            }`}
           />
 
           {/* Step 2 dot */}
           <div
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: "600",
-              background:
-                step === 2
-                  ? "var(--gradient-primary, linear-gradient(135deg, #3b82f6, #a855f7))"
-                  : "rgba(255,255,255,0.1)",
-              color: step === 2 ? "#fff" : "rgba(255,255,255,0.4)",
-              transition: "all 0.3s ease",
-            }}
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
+              step === 2
+                ? "bg-gradient-to-br from-primary to-secondary text-white"
+                : "bg-surface-hover text-text-muted"
+            }`}
           >
             2
           </div>
         </div>
 
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "12px",
-            color: "rgba(255,255,255,0.4)",
-          }}
-        >
+        <p className="text-center text-xs text-text-muted">
           Step {step} of 2 —{" "}
           {step === 1 ? "Personal Information" : "Organization Details"}
         </p>
@@ -314,13 +273,7 @@ export default function RegisterPage() {
       {step === 1 && (
         <form onSubmit={handleNextStep} className="space-y-4">
           {/* Row: Name + Email */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-            }}
-          >
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="dark-label">Full Name</label>
               <input
@@ -355,13 +308,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Row: Password + Confirm */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-            }}
-          >
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="dark-label">Password</label>
               <input
@@ -422,21 +369,14 @@ export default function RegisterPage() {
           </div>
 
           {/* Row: Industry + Size */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-            }}
-          >
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="dark-label">Industry</label>
               <select
                 name="industry"
                 value={org.industry}
                 onChange={handleOrgChange}
-                className="dark-input"
-                style={{ cursor: "pointer" }}
+                className="dark-input cursor-pointer"
               >
                 {INDUSTRIES.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -455,8 +395,7 @@ export default function RegisterPage() {
                 name="size"
                 value={org.size}
                 onChange={handleOrgChange}
-                className="dark-input"
-                style={{ cursor: "pointer" }}
+                className="dark-input cursor-pointer"
               >
                 {SIZES.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -471,22 +410,12 @@ export default function RegisterPage() {
           </div>
 
           {/* Buttons */}
-          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+          <div className="flex gap-3 mt-2">
             <button
               type="button"
               onClick={handleBack}
               disabled={isLoading}
-              style={{
-                flex: "0 0 auto",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: "rgba(255,255,255,0.05)",
-                color: "rgba(255,255,255,0.7)",
-                cursor: "pointer",
-                fontSize: "14px",
-                transition: "all 0.2s ease",
-              }}
+              className="flex-none px-5 py-2.5 rounded-lg border border-border bg-surface text-text-secondary text-sm cursor-pointer transition-all duration-200 hover:bg-surface-hover hover:border-border-hover hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ← Back
             </button>
@@ -494,8 +423,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="gradient-button"
-              style={{ flex: 1 }}
+              className="gradient-button flex-1"
             >
               {isLoading ? "Creating Account..." : "Create Account 🚀"}
             </button>

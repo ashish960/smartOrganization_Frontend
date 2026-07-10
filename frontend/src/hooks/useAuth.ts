@@ -70,8 +70,14 @@ export const useAuth = () => {
   // Restore auth from localStorage
   const restoreAuthFromStorage = () => {
     const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
     if (savedToken) {
-      dispatch(restoreAuth({ token: savedToken, user: null }));
+      try {
+        const userObj = savedUser ? JSON.parse(savedUser) : null;
+        dispatch(restoreAuth({ token: savedToken, user: userObj }));
+      } catch (e) {
+        dispatch(restoreAuth({ token: savedToken, user: null }));
+      }
     }
   };
 

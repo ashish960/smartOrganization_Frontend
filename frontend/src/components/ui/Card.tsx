@@ -1,25 +1,18 @@
 "use client";
 
-import { CSSProperties, ReactNode } from "react";
+import { ReactNode } from "react";
 
 interface CardProps {
   children: ReactNode;
-  style?: CSSProperties;
   className?: string;
+  onClick?: () => void;
 }
 
-// Reusable card wrapper — consistent surface styling across all pages
-export default function Card({ children, style, className }: CardProps) {
+export default function Card({ children, className = "", onClick }: CardProps) {
   return (
     <div
-      className={className}
-      style={{
-        padding: "20px",
-        borderRadius: "14px",
-        background: "rgba(255,255,255,0.02)",
-        border: "1px solid var(--color-border)",
-        ...style,
-      }}
+      onClick={onClick}
+      className={`p-5 rounded-2xl bg-surface/50 backdrop-blur-sm border border-border shadow-sm transition-all duration-300 ${onClick ? "cursor-pointer hover:bg-surface-hover hover:border-primary/30 hover:shadow-md" : ""} ${className}`}
     >
       {children}
     </div>

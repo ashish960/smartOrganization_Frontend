@@ -32,18 +32,12 @@ const INDUSTRIES = [
 
 const SIZES = ["1-10", "11-50", "51-200", "201-500", "500+"];
 
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "10px 14px", borderRadius: "8px",
-  background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)",
-  color: "var(--color-text)", fontSize: "14px", outline: "none", boxSizing: "border-box",
-};
-
 function Section({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div style={{ padding: "24px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", marginBottom: "20px" }}>
-      <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ fontSize: "15px", fontWeight: "700", marginBottom: "4px" }}>{title}</h3>
-        <p style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>{subtitle}</p>
+    <div className="p-6 rounded-2xl bg-surface border border-border mb-5">
+      <div className="mb-5">
+        <h3 className="text-[15px] font-bold mb-1 text-text-primary">{title}</h3>
+        <p className="text-[13px] text-text-muted">{subtitle}</p>
       </div>
       {children}
     </div>
@@ -52,8 +46,8 @@ function Section({ title, subtitle, children }: { title: string; subtitle: strin
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: "16px" }}>
-      <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--color-text-muted)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+    <div className="mb-4">
+      <label className="dark-label">
         {label}
       </label>
       {children}
@@ -189,9 +183,8 @@ export default function SettingsPage() {
 
   if (isLoading) return (
     <DashboardLayout title="Settings" subtitle="Manage your account and organization">
-      <div style={{ display: "flex", justifyContent: "center", padding: "80px", opacity: 0.5 }}>
-        <div style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid #3b82f6", animation: "spin 0.8s linear infinite" }}/>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="flex justify-center py-20 opacity-50">
+        <div className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
       </div>
     </DashboardLayout>
   );
@@ -201,42 +194,43 @@ export default function SettingsPage() {
 
       {/* Toast */}
       {toast && (
-        <div style={{
-          position: "fixed", top: "80px", right: "24px", zIndex: 999,
-          padding: "12px 20px", borderRadius: "10px", fontSize: "14px", fontWeight: "500",
-          background: toast.type === "success" ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
-          border: `1px solid ${toast.type === "success" ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)"}`,
-          color: toast.type === "success" ? "#10b981" : "#ef4444",
-        }}>
+        <div className={`fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl text-sm font-medium
+          ${toast.type === "success"
+            ? "bg-success/15 border border-success/30 text-success"
+            : "bg-error/15 border border-error/30 text-error"
+          }`}
+        >
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "24px" }}>
+      <div className="grid grid-cols-[220px_1fr] gap-6">
 
         {/* ── Sidebar tabs ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div className="flex flex-col gap-1">
           {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              padding: "10px 14px", borderRadius: "8px", textAlign: "left", fontSize: "14px",
-              border: "none", cursor: "pointer", fontWeight: activeTab === tab.id ? "600" : "400",
-              background: activeTab === tab.id ? "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15))" : "transparent",
-              color: activeTab === tab.id ? "var(--color-text)" : "var(--color-text-muted)",
-              borderLeft: activeTab === tab.id ? "2px solid #3b82f6" : "2px solid transparent",
-            }}>
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3.5 py-2.5 rounded-lg text-left text-sm border-l-2 transition-all cursor-pointer
+                ${activeTab === tab.id
+                  ? "font-semibold bg-gradient-to-br from-primary/15 to-secondary/15 text-text-primary border-l-primary"
+                  : "font-normal bg-transparent text-text-muted border-l-transparent hover:bg-surface-hover hover:text-text-secondary"
+                }`}
+            >
               {tab.label}
             </button>
           ))}
 
           {/* User card */}
           {profile && (
-            <div style={{ marginTop: "20px", padding: "14px", borderRadius: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: "700", color: "#fff", margin: "0 auto 10px" }}>
+            <div className="mt-5 p-3.5 rounded-xl bg-surface border border-border">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-base font-bold text-white mx-auto mb-2.5">
                 {profile.name?.[0]?.toUpperCase()}
               </div>
-              <p style={{ fontSize: "13px", fontWeight: "600", textAlign: "center" }}>{profile.name}</p>
-              <p style={{ fontSize: "11px", color: "var(--color-text-muted)", textAlign: "center" }}>{profile.email}</p>
-              <p style={{ fontSize: "10px", color: "#a855f7", textAlign: "center", marginTop: "4px", fontWeight: "600" }}>{profile.role.replace("_", " ")}</p>
+              <p className="text-[13px] font-semibold text-center text-text-primary">{profile.name}</p>
+              <p className="text-[11px] text-text-muted text-center">{profile.email}</p>
+              <p className="text-[10px] text-secondary text-center mt-1 font-semibold">{profile.role.replace("_", " ")}</p>
             </div>
           )}
         </div>
@@ -247,21 +241,21 @@ export default function SettingsPage() {
           {/* Profile */}
           {activeTab === "profile" && (
             <Section title="Profile Information" subtitle="Update your personal details">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Full Name *">
-                  <input value={profileForm.name} onChange={(e) => setProfileForm(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="John Doe" />
+                  <input value={profileForm.name} onChange={(e) => setProfileForm(p => ({ ...p, name: e.target.value }))} className="dark-input" placeholder="John Doe" />
                 </Field>
                 <Field label="Email">
-                  <input value={profile?.email || ""} style={{ ...inputStyle, opacity: 0.5, cursor: "not-allowed" }} disabled />
+                  <input value={profile?.email || ""} className="dark-input opacity-50 cursor-not-allowed" disabled />
                 </Field>
                 <Field label="Job Title">
-                  <input value={profileForm.jobTitle} onChange={(e) => setProfileForm(p => ({ ...p, jobTitle: e.target.value }))} style={inputStyle} placeholder="e.g. Software Engineer" />
+                  <input value={profileForm.jobTitle} onChange={(e) => setProfileForm(p => ({ ...p, jobTitle: e.target.value }))} className="dark-input" placeholder="e.g. Software Engineer" />
                 </Field>
                 <Field label="Phone">
-                  <input value={profileForm.phone} onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))} style={inputStyle} placeholder="+91 98765 43210" />
+                  <input value={profileForm.phone} onChange={(e) => setProfileForm(p => ({ ...p, phone: e.target.value }))} className="dark-input" placeholder="+91 98765 43210" />
                 </Field>
               </div>
-              <button onClick={handleProfileSave} disabled={profileSaving} className="gradient-button" style={{ marginTop: "8px" }}>
+              <button onClick={handleProfileSave} disabled={profileSaving} className="gradient-button mt-2">
                 {profileSaving ? "Saving..." : "Save Profile"}
               </button>
             </Section>
@@ -271,20 +265,20 @@ export default function SettingsPage() {
           {activeTab === "password" && (
             <Section title="Change Password" subtitle="Update your account password">
               <Field label="Current Password">
-                <input type="password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))} style={inputStyle} placeholder="••••••••" />
+                <input type="password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))} className="dark-input" placeholder="••••••••" />
               </Field>
               <Field label="New Password">
-                <input type="password" value={passwordForm.newPassword} onChange={(e) => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))} style={inputStyle} placeholder="••••••••" />
-                <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "4px" }}>Minimum 8 characters</p>
+                <input type="password" value={passwordForm.newPassword} onChange={(e) => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))} className="dark-input" placeholder="••••••••" />
+                <p className="text-[11px] text-text-muted mt-1">Minimum 8 characters</p>
               </Field>
               <Field label="Confirm New Password">
-                <input type="password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))} style={inputStyle} placeholder="••••••••" />
+                <input type="password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))} className="dark-input" placeholder="••••••••" />
               </Field>
               {passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword && (
-                <p style={{ fontSize: "12px", color: "#ef4444", marginBottom: "12px" }}>❌ Passwords don&apos;t match</p>
+                <p className="text-xs text-error mb-3">❌ Passwords don&apos;t match</p>
               )}
               {passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword === passwordForm.confirmPassword && (
-                <p style={{ fontSize: "12px", color: "#10b981", marginBottom: "12px" }}>✅ Passwords match</p>
+                <p className="text-xs text-success mb-3">✅ Passwords match</p>
               )}
               <button onClick={handlePasswordSave} disabled={passwordSaving} className="gradient-button">
                 {passwordSaving ? "Changing..." : "Change Password"}
@@ -297,27 +291,27 @@ export default function SettingsPage() {
             isAdmin ? (
               <Section title="Organization Settings" subtitle="Update your organization details">
                 <Field label="Organization Name *">
-                  <input value={orgForm.name} onChange={(e) => setOrgForm(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="Acme Corp" />
+                  <input value={orgForm.name} onChange={(e) => setOrgForm(p => ({ ...p, name: e.target.value }))} className="dark-input" placeholder="Acme Corp" />
                 </Field>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div className="grid grid-cols-2 gap-4">
                   <Field label="Industry">
-                    <select value={orgForm.industry} onChange={(e) => setOrgForm(p => ({ ...p, industry: e.target.value }))} style={inputStyle}>
+                    <select value={orgForm.industry} onChange={(e) => setOrgForm(p => ({ ...p, industry: e.target.value }))} className="dark-input">
                       {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                     </select>
                   </Field>
                   <Field label="Company Size">
-                    <select value={orgForm.size} onChange={(e) => setOrgForm(p => ({ ...p, size: e.target.value }))} style={inputStyle}>
+                    <select value={orgForm.size} onChange={(e) => setOrgForm(p => ({ ...p, size: e.target.value }))} className="dark-input">
                       {SIZES.map(s => <option key={s} value={s}>{s} employees</option>)}
                     </select>
                   </Field>
                 </div>
 
                 {/* Plan info */}
-                <div style={{ padding: "14px 16px", borderRadius: "10px", background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(168,85,247,0.08))", border: "1px solid rgba(59,130,246,0.2)", marginBottom: "16px" }}>
-                  <p style={{ fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>
-                    Current Plan: <span style={{ color: "#3b82f6" }}>{profile?.organization?.plan || "STARTER"}</span>
+                <div className="px-4 py-3.5 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 mb-4">
+                  <p className="text-[13px] font-semibold mb-1 text-text-primary">
+                    Current Plan: <span className="text-primary">{profile?.organization?.plan || "STARTER"}</span>
                   </p>
-                  <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>Contact support to upgrade your plan</p>
+                  <p className="text-xs text-text-muted">Contact support to upgrade your plan</p>
                 </div>
 
                 <button onClick={handleOrgSave} disabled={orgSaving} className="gradient-button">
@@ -326,8 +320,8 @@ export default function SettingsPage() {
               </Section>
             ) : (
               <Section title="Organization Settings" subtitle="Organization details">
-                <div style={{ padding: "20px", borderRadius: "10px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", textAlign: "center" }}>
-                  <p style={{ fontSize: "14px", color: "#f59e0b" }}>⚠️ Only Org Admins can update organization settings</p>
+                <div className="p-5 rounded-xl bg-warning/10 border border-warning/20 text-center">
+                  <p className="text-sm text-warning">⚠️ Only Org Admins can update organization settings</p>
                 </div>
               </Section>
             )
@@ -343,28 +337,26 @@ export default function SettingsPage() {
                 { key: "weeklyDigest",   label: "Weekly Digest",       sub: "Receive a weekly summary of activity"      },
                 { key: "securityAlerts", label: "Security Alerts",     sub: "Get notified of suspicious login attempts" },
               ].map(item => (
-                <div key={item.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid var(--color-border)" }}>
+                <div key={item.key} className="flex items-center justify-between py-3.5 border-b border-border">
                   <div>
-                    <p style={{ fontSize: "14px", fontWeight: "600" }}>{item.label}</p>
-                    <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>{item.sub}</p>
+                    <p className="text-sm font-semibold text-text-primary">{item.label}</p>
+                    <p className="text-xs text-text-muted">{item.sub}</p>
                   </div>
                   <div
                     onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof prev] }))}
-                    style={{
-                      width: "44px", height: "24px", borderRadius: "12px", cursor: "pointer",
-                      background: notifications[item.key as keyof typeof notifications] ? "linear-gradient(135deg, #3b82f6, #a855f7)" : "rgba(255,255,255,0.1)",
-                      position: "relative", transition: "all 0.2s ease", flexShrink: 0,
-                    }}
+                    className={`w-11 h-6 rounded-full cursor-pointer relative transition-all duration-200 shrink-0
+                      ${notifications[item.key as keyof typeof notifications]
+                        ? "bg-gradient-to-br from-primary to-secondary"
+                        : "bg-border"
+                      }`}
                   >
-                    <div style={{
-                      width: "18px", height: "18px", borderRadius: "50%", background: "#fff",
-                      position: "absolute", top: "3px", transition: "left 0.2s ease",
-                      left: notifications[item.key as keyof typeof notifications] ? "23px" : "3px",
-                    }}/>
+                    <div className={`w-[18px] h-[18px] rounded-full bg-white absolute top-[3px] transition-all duration-200
+                      ${notifications[item.key as keyof typeof notifications] ? "left-[23px]" : "left-[3px]"}`}
+                    />
                   </div>
                 </div>
               ))}
-              <button className="gradient-button" style={{ marginTop: "20px" }} onClick={() => showToast("Notification preferences saved!", "success")}>
+              <button className="gradient-button mt-5" onClick={() => showToast("Notification preferences saved!", "success")}>
                 Save Preferences
               </button>
             </Section>
@@ -373,7 +365,6 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </DashboardLayout>
   );
 }

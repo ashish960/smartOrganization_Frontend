@@ -16,21 +16,20 @@ interface ToastProps {
   onRemove: (id: string) => void;
 }
 
-// Single Toast Item
 const ToastItem = ({ toast, onRemove }: ToastProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
-    // Animate in
-    setTimeout(() => setIsVisible(true), 10);
-
-    // Auto remove
-    const timer = setTimeout(() => {
+    const showTimer = setTimeout(() => setIsVisible(true), 10);
+    const removeTimer = setTimeout(() => {
       handleRemove();
     }, toast.duration || 4000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(removeTimer);
+    };
   }, []);
 
   const handleRemove = () => {
@@ -38,123 +37,64 @@ const ToastItem = ({ toast, onRemove }: ToastProps) => {
     setTimeout(() => onRemove(toast.id), 300);
   };
 
-  const styles = {
+  const styleVariants = {
     success: {
-      background: "rgba(34, 197, 94, 0.15)",
-      border: "1px solid rgba(34, 197, 94, 0.3)",
+      wrapper: "bg-success/10 border-success/20 text-success",
       icon: "✅",
-      color: "#22c55e",
-      progressColor: "#22c55e",
+      progress: "bg-success",
     },
     error: {
-      background: "rgba(239, 68, 68, 0.15)",
-      border: "1px solid rgba(239, 68, 68, 0.3)",
+      wrapper: "bg-error/10 border-error/20 text-error",
       icon: "❌",
-      color: "#ef4444",
-      progressColor: "#ef4444",
+      progress: "bg-error",
     },
     warning: {
-      background: "rgba(245, 158, 11, 0.15)",
-      border: "1px solid rgba(245, 158, 11, 0.3)",
+      wrapper: "bg-warning/10 border-warning/20 text-warning",
       icon: "⚠️",
-      color: "#f59e0b",
-      progressColor: "#f59e0b",
+      progress: "bg-warning",
     },
     info: {
-      background: "rgba(59, 130, 246, 0.15)",
-      border: "1px solid rgba(59, 130, 246, 0.3)",
+      wrapper: "bg-primary/10 border-primary/20 text-primary",
       icon: "ℹ️",
-      color: "#3b82f6",
-      progressColor: "#3b82f6",
+      progress: "bg-primary",
     },
   };
 
-  const style = styles[toast.type];
+  const variant = styleVariants[toast.type];
 
   return (
     <div
-      style={{
-        background: style.background,
-        border: style.border,
-        borderRadius: "12px",
-        padding: "12px 16px",
-        marginBottom: "10px",
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        minWidth: "300px",
-        maxWidth: "400px",
-        backdropFilter: "blur(10px)",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-        transform: isLeaving
-          ? "translateX(120%)"
-          : isVisible
-          ? "translateX(0)"
-          : "translateX(120%)",
-        opacity: isLeaving ? 0 : isVisible ? 1 : 0,
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        position: "relative",
-        overflow: "hidden",
-        cursor: "pointer",
-      }}
       onClick={handleRemove}
+      className={`relative flex items-center gap-3 min-w-[300px] max-w-[400px] p-3 mb-2 rounded-xl border backdrop-blur-md shadow-lg cursor-pointer transition-all duration-300 ease-out overflow-hidden ${variant.wrapper} ${
+        isLeaving ? "translate-x-[120%] opacity-0" : isVisible ? "translate-x-0 opacity-100" : "translate-x-[120%] opacity-0"
+      }`}
     >
-      {/* Icon */}
-      <span style={{ fontSize: "18px", flexShrink: 0 }}>
-        {style.icon}
-      </span>
-
-      {/* Message */}
-      <p
-        style={{
-          color: "white",
-          fontSize: "14px",
-          fontWeight: 500,
-          flex: 1,
-          lineHeight: "1.4",
-        }}
-      >
+      <span className="text-lg flex-shrink-0">{variant.icon}</span>
+      <p className="text-sm font-medium flex-1 leading-snug text-text-primary">
         {toast.message}
       </p>
-
-      {/* Close button */}
       <button
         onClick={(e) => {
           e.stopPropagation();
           handleRemove();
         }}
-        style={{
-          background: "none",
-          border: "none",
-          color: "rgba(255,255,255,0.5)",
-          cursor: "pointer",
-          fontSize: "16px",
-          flexShrink: 0,
-          padding: "0",
-          lineHeight: 1,
-        }}
+        className="flex-shrink-0 p-1 text-text-muted hover:text-text-primary transition-colors focus:outline-none"
       >
-        ×
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
 
       {/* Progress bar */}
       <div
+        className={`absolute bottom-0 left-0 h-1 rounded-bl-xl opacity-70 ${variant.progress}`}
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          height: "3px",
-          background: style.progressColor,
-          borderRadius: "0 0 0 12px",
+          width: "100%",
           animation: `shrink ${toast.duration || 4000}ms linear forwards`,
-          opacity: 0.7,
         }}
       />
     </div>
   );
 };
 
-// Toast Container
 interface ToastContainerProps {
   toasts: ToastMessage[];
   onRemove: (id: string) => void;
@@ -162,23 +102,9 @@ interface ToastContainerProps {
 
 export const ToastContainer = ({ toasts, onRemove }: ToastContainerProps) => {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "20px",
-        right: "20px",
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-      }}
-    >
+    <div className="fixed top-5 right-5 z-[9999] flex flex-col items-end">
       {toasts.map((toast) => (
-        <ToastItem
-          key={toast.id}
-          toast={toast}
-          onRemove={onRemove}
-        />
+        <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
     </div>
   );

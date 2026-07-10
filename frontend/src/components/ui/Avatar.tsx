@@ -6,24 +6,16 @@ interface AvatarProps {
   fontSize?: number;
 }
 
-// Reusable avatar — shows first letter of name with gradient background
 export default function Avatar({ name, size = 34, fontSize = 13 }: AvatarProps) {
   return (
-    <div style={{
-      width: `${size}px`,
-      height: `${size}px`,
-      borderRadius: "50%",
-      background: "linear-gradient(135deg, #3b82f6, #a855f7)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: `${fontSize}px`,
-      fontWeight: "700",
-      color: "#fff",
-      flexShrink: 0,
-      cursor: "pointer",
-      userSelect: "none",
-    }}>
+    <div
+      className="flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold flex-shrink-0 cursor-pointer select-none shadow-sm hover:shadow-md transition-shadow"
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        fontSize: `${fontSize}px`,
+      }}
+    >
       {name?.[0]?.toUpperCase() ?? "?"}
     </div>
   );

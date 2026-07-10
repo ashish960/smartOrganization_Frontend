@@ -99,13 +99,12 @@ export default function LoginPage() {
         {/* Password */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="dark-label" style={{ marginBottom: 0 }}>
+            <label className="dark-label !mb-0">
               Password
             </label>
             <a
               href="/auth/forgot-password"
-              className="text-xs font-medium transition-colors"
-              style={{ color: "var(--color-primary)" }}
+              className="text-xs font-medium transition-colors text-primary hover:text-primary-hover"
             >
               Forgot password?
             </a>

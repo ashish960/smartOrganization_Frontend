@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useSelector } from "react-redux";
 import { AppRootState } from "@/store";
+import Button from "@/components/ui/Button";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Member {
@@ -48,25 +49,25 @@ type ModalType = "none" | "create-template" | "create-custom" | "view" | "add-me
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const getRoleBadgeStyle = (role: string) => {
-  const styles: Record<string, { bg: string; color: string }> = {
-    ORG_ADMIN:    { bg: "rgba(168,85,247,0.1)",  color: "#a855f7" },
-    DEPT_MANAGER: { bg: "rgba(59,130,246,0.1)",  color: "#3b82f6" },
-    USER:         { bg: "rgba(16,185,129,0.1)",  color: "#10b981" },
-    VIEWER:       { bg: "rgba(107,114,128,0.1)", color: "#6b7280" },
+  const styles: Record<string, string> = {
+    ORG_ADMIN:    "bg-secondary/10 text-secondary border border-secondary/20",
+    DEPT_MANAGER: "bg-primary/10 text-primary border border-primary/20",
+    USER:         "bg-success/10 text-success border border-success/20",
+    VIEWER:       "bg-text-muted/10 text-text-muted border border-border",
   };
-  return styles[role] ?? { bg: "rgba(107,114,128,0.1)", color: "#6b7280" };
+  return styles[role] ?? "bg-text-muted/10 text-text-muted border border-border";
 };
 
 const getVisibilityStyle = (v: string) => {
-  if (v === "PUBLIC")     return { color: "#10b981", bg: "rgba(16,185,129,0.1)" };
-  if (v === "RESTRICTED") return { color: "#ef4444", bg: "rgba(239,68,68,0.1)"  };
-  return                         { color: "#3b82f6", bg: "rgba(59,130,246,0.1)" };
+  if (v === "PUBLIC")     return "bg-success/10 text-success border border-success/20";
+  if (v === "RESTRICTED") return "bg-error/10 text-error border border-error/20";
+  return                         "bg-primary/10 text-primary border border-primary/20";
 };
 
 function Modal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }} onClick={onClose}>
-      <div style={{ background: "var(--color-surface)", borderRadius: "16px", border: "1px solid var(--color-border)", padding: "28px", width: "100%", maxWidth: "520px", maxHeight: "85vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-5" onClick={onClose}>
+      <div className="bg-surface rounded-2xl border border-border p-7 w-full max-w-[500px] max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -75,18 +76,12 @@ function Modal({ onClose, children }: { onClose: () => void; children: React.Rea
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: "16px" }}>
-      <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "var(--color-text-muted)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</label>
+    <div className="mb-4">
+      <label className="block text-[11px] font-bold text-text-muted mb-1.5 uppercase tracking-wider">{label}</label>
       {children}
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "10px 14px", borderRadius: "8px",
-  background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)",
-  color: "var(--color-text)", fontSize: "14px", outline: "none", boxSizing: "border-box",
-};
 
 export default function DepartmentsPage() {
   const { token } = useSelector((state: AppRootState) => state.auth);
@@ -106,7 +101,7 @@ export default function DepartmentsPage() {
   const [customForm, setCustomForm]     = useState({ name: "", code: "", icon: "📁", description: "" });
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [isSaving, setIsSaving]         = useState(false);
-  const [accessDeptIds, setAccessDeptIds] = useState<string[]>([]); // ← MOVED INSIDE component
+  const [accessDeptIds, setAccessDeptIds] = useState<string[]>([]);
 
   const showSuccess = (msg: string) => { setSuccess(msg); setTimeout(() => setSuccess(null), 3000); };
   const showError   = (msg: string) => { setError(msg);   setTimeout(() => setError(null),   4000); };
@@ -136,7 +131,7 @@ export default function DepartmentsPage() {
       } catch { if (!cancelled) showError("Failed to load departments"); }
       finally  { if (!cancelled) setIsLoading(false); }
     };
-    load();
+    if (token) load();
     return () => { cancelled = true; };
   }, [token, refresh]);
 
@@ -193,7 +188,8 @@ export default function DepartmentsPage() {
     } catch (err: unknown) {
         showError(err instanceof Error ? err.message : "Failed to remove");
     }
-};
+  };
+
   const handleUpdateAccessMatrix = async () => {
     if (!selected) return;
     setIsSaving(true);
@@ -222,125 +218,127 @@ export default function DepartmentsPage() {
   return (
     <DashboardLayout title="Departments" subtitle="Manage your organization's departments and teams">
 
-      {success && <div style={{ position: "fixed", top: "80px", right: "24px", zIndex: 999, padding: "12px 20px", borderRadius: "10px", background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", fontSize: "14px", fontWeight: "500" }}>✅ {success}</div>}
-      {error   && <div style={{ position: "fixed", top: "80px", right: "24px", zIndex: 999, padding: "12px 20px", borderRadius: "10px", background: "rgba(239,68,68,0.15)",   border: "1px solid rgba(239,68,68,0.3)",   color: "#ef4444", fontSize: "14px", fontWeight: "500" }}>❌ {error} <button onClick={() => setError(null)} style={{ marginLeft: "12px", background: "none", border: "none", cursor: "pointer", color: "#ef4444" }}>✕</button></div>}
+      {success && <div className="fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl bg-success/10 border border-success/30 text-success text-sm font-medium backdrop-blur-md shadow-lg">✅ {success}</div>}
+      {error   && <div className="fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm font-medium backdrop-blur-md shadow-lg">❌ {error} <button onClick={() => setError(null)} className="ml-3 text-error hover:opacity-80">✕</button></div>}
 
       {/* Top bar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <input type="text" placeholder="Search departments..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ flex: 1, minWidth: "200px", maxWidth: "340px", padding: "10px 16px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "14px", outline: "none" }} />
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={() => setModal("create-template")} style={{ padding: "10px 18px", borderRadius: "10px", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6", fontSize: "14px", fontWeight: "600", cursor: "pointer" }}>+ From Template</button>
-          <button onClick={() => setModal("create-custom")} className="gradient-button" style={{ padding: "10px 18px", fontSize: "14px" }}>+ Custom Department</button>
+          className="flex-1 min-w-[200px] max-w-[340px] px-4 py-2.5 rounded-xl bg-surface border border-border text-text-primary text-sm outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all shadow-sm" />
+        <div className="flex gap-2">
+          <Button onClick={() => setModal("create-template")} variant="secondary" size="sm">+ From Template</Button>
+          <Button onClick={() => setModal("create-custom")} variant="primary" size="sm">+ Custom Department</Button>
         </div>
       </div>
 
       {/* Stats */}
-      <div style={{ display: "flex", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
+      <div className="flex flex-wrap gap-4 mb-6">
         {[
-          { label: "Total Departments", value: departments.length,                                     color: "#3b82f6" },
-          { label: "Total Members",     value: departments.reduce((s, d) => s + d.members.length, 0), color: "#10b981" },
-          { label: "From Templates",    value: departments.filter(d => d.isFromTemplate).length,      color: "#a855f7" },
-          { label: "Custom",            value: departments.filter(d => !d.isFromTemplate).length,     color: "#f59e0b" },
+          { label: "Total Departments", value: departments.length,                                     color: "text-primary", bg: "bg-primary/5" },
+          { label: "Total Members",     value: departments.reduce((s, d) => s + d.members.length, 0), color: "text-success", bg: "bg-success/5" },
+          { label: "From Templates",    value: departments.filter(d => d.isFromTemplate).length,      color: "text-secondary", bg: "bg-secondary/5" },
+          { label: "Custom",            value: departments.filter(d => !d.isFromTemplate).length,     color: "text-warning", bg: "bg-warning/5" },
         ].map((s) => (
-          <div key={s.label} style={{ padding: "12px 20px", borderRadius: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "20px", fontWeight: "700", color: s.color }}>{s.value}</span>
-            <span style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>{s.label}</span>
+          <div key={s.label} className={`px-5 py-3 rounded-xl ${s.bg} border border-border flex items-center gap-3 backdrop-blur-sm shadow-sm`}>
+            <span className={`text-2xl font-bold ${s.color}`}>{s.value}</span>
+            <span className="text-sm font-medium text-text-muted">{s.label}</span>
           </div>
         ))}
       </div>
 
       {/* Grid */}
       {isLoading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "60px", opacity: 0.5 }}>
-          <div style={{ width: "32px", height: "32px", borderRadius: "50%", border: "2px solid rgba(255,255,255,0.1)", borderTop: "2px solid #3b82f6", animation: "spin 0.8s linear infinite" }}/>
+        <div className="flex justify-center py-20 opacity-50">
+          <div className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 20px", gap: "16px", opacity: 0.5 }}>
-          <span style={{ fontSize: "48px" }}>🏢</span>
-          <p style={{ fontSize: "18px", fontWeight: "600" }}>{searchQuery ? "No departments found" : "No departments yet"}</p>
-          <p style={{ fontSize: "14px", color: "var(--color-text-muted)" }}>{searchQuery ? "Try a different search" : "Create your first department"}</p>
+        <div className="flex flex-col items-center justify-center py-20 px-5 gap-4 opacity-50">
+          <span className="text-5xl">🏢</span>
+          <p className="text-lg font-semibold text-text-primary">{searchQuery ? "No departments found" : "No departments yet"}</p>
+          <p className="text-sm text-text-muted">{searchQuery ? "Try a different search" : "Create your first department"}</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((dept) => {
-            const visStyle = getVisibilityStyle(dept.permissions.documentVisibility);
+            const visClass = getVisibilityStyle(dept.permissions.documentVisibility);
             return (
-              <div key={dept._id} style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", display: "flex", flexDirection: "column", gap: "14px" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                  <div style={{ fontSize: "32px", lineHeight: 1 }}>{dept.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      <p style={{ fontSize: "15px", fontWeight: "700" }}>{dept.name}</p>
-                      {dept.isMandatory && <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "5px", background: "rgba(245,158,11,0.1)", color: "#f59e0b", fontWeight: "600" }}>MANDATORY</span>}
+              <div key={dept._id} className="p-5 rounded-2xl bg-surface/50 backdrop-blur-sm border border-border shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl flex-shrink-0">{dept.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-bold text-text-primary truncate">{dept.name}</p>
+                      {dept.isMandatory && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-warning/10 text-warning font-bold tracking-wider">MANDATORY</span>}
                     </div>
-                    <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "2px" }}>Code: <strong>{dept.code}</strong></p>
+                    <p className="text-[10px] text-text-muted mt-0.5">Code: <strong className="text-text-primary">{dept.code}</strong></p>
                   </div>
-                  <span style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "6px", fontWeight: "600", background: visStyle.bg, color: visStyle.color, whiteSpace: "nowrap" }}>{dept.permissions.documentVisibility}</span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${visClass}`}>{dept.permissions.documentVisibility}</span>
                 </div>
 
-                {dept.description && <p style={{ fontSize: "13px", color: "var(--color-text-muted)", lineHeight: 1.5 }}>{dept.description}</p>}
+                {dept.description && <p className="text-xs text-text-muted leading-relaxed truncate-2-lines">{dept.description}</p>}
 
                 {dept.head && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", borderRadius: "8px", background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.1)" }}>
-                    <span style={{ fontSize: "12px" }}>👑</span>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
+                    <span className="text-sm">👑</span>
                     <div>
-                      <p style={{ fontSize: "12px", fontWeight: "600" }}>{dept.head.name}</p>
-                      <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Department Head</p>
+                      <p className="text-xs font-semibold text-text-primary">{dept.head.name}</p>
+                      <p className="text-[10px] text-text-muted">Department Head</p>
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "var(--color-text-muted)", fontWeight: "600" }}>MEMBERS ({dept.members.length})</span>
-                    <button onClick={() => { setSelected(dept); setModal("add-member"); }} style={{ fontSize: "11px", padding: "3px 8px", borderRadius: "6px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", color: "#10b981", cursor: "pointer", fontWeight: "600" }}>+ Add</button>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-text-muted tracking-wider">MEMBERS ({dept.members.length})</span>
+                    <button onClick={() => { setSelected(dept); setModal("add-member"); }} className="text-[10px] px-2 py-0.5 rounded-md bg-success/15 border border-success/30 text-success font-semibold hover:bg-success/20 transition-colors">+ Add</button>
                   </div>
                   {dept.members.length === 0 ? (
-                    <p style={{ fontSize: "12px", color: "var(--color-text-muted)", opacity: 0.5 }}>No members yet</p>
+                    <p className="text-xs text-text-muted italic opacity-65">No members yet</p>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div className="flex flex-col gap-2">
                       {dept.members.slice(0, 3).map((m) => {
-                        const rs = getRoleBadgeStyle(m.role);
+                        const rsClass = getRoleBadgeStyle(m.role);
                         return (
-                          <div key={m._id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "700", color: "#fff", flexShrink: 0 }}>
+                          <div key={m._id} className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 shadow-sm">
                               {m.name?.[0]?.toUpperCase()}
                             </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: "12px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.name}</p>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-text-primary truncate">{m.name}</p>
                             </div>
-                            <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "5px", fontWeight: "600", background: rs.bg, color: rs.color, whiteSpace: "nowrap" }}>{m.role.replace("_", " ")}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${rsClass}`}>{m.role.replace("_", " ")}</span>
                           </div>
                         );
                       })}
-                      {dept.members.length > 3 && <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>+{dept.members.length - 3} more</p>}
+                      {dept.members.length > 3 && <p className="text-[10px] text-text-muted font-medium">+{dept.members.length - 3} more</p>}
                     </div>
                   )}
                 </div>
 
                 {/* Cross-access badge */}
                 {dept.permissions.canAccessDepartments.length > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 10px", borderRadius: "7px", background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.15)" }}>
-                    <span style={{ fontSize: "11px" }}>🔗</span>
-                    <span style={{ fontSize: "11px", color: "#a855f7", fontWeight: "600" }}>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/5 border border-secondary/15">
+                    <span className="text-xs">🔗</span>
+                    <span className="text-[10px] text-secondary font-semibold">
                       Cross-access: {dept.permissions.canAccessDepartments.length} dept{dept.permissions.canAccessDepartments.length > 1 ? "s" : ""}
                     </span>
                   </div>
                 )}
 
-                <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
-                  <button onClick={() => { setSelected(dept); setModal("view"); }} style={{ flex: 1, padding: "8px", borderRadius: "8px", background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}>View Details</button>
-                  <button
+                <div className="flex gap-2 mt-auto pt-2">
+                  <Button onClick={() => { setSelected(dept); setModal("view"); }} variant="secondary" size="sm" className="flex-1">View Details</Button>
+                  <Button
                     onClick={() => {
                       setSelected(dept);
                       setAccessDeptIds(dept.permissions.canAccessDepartments as unknown as string[]);
                       setModal("access-matrix");
                     }}
-                    style={{ flex: 1, padding: "8px", borderRadius: "8px", background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", color: "#a855f7", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                   >
                     Access Matrix
-                  </button>
+                  </Button>
                 </div>
               </div>
             );
@@ -351,28 +349,28 @@ export default function DepartmentsPage() {
       {/* Modal: Create from Template */}
       {modal === "create-template" && (
         <Modal onClose={closeModal}>
-          <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Create from Template</h2>
-          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "24px" }}>Choose a pre-built department template</p>
+          <h2 className="text-lg font-bold text-text-primary mb-1">Create from Template</h2>
+          <p className="text-xs text-text-muted mb-5">Choose a pre-built department template</p>
           {templates.length === 0 ? (
-            <p style={{ color: "var(--color-text-muted)", fontSize: "14px" }}>No templates available</p>
+            <p className="text-sm text-text-muted">No templates available</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
+            <div className="flex flex-col gap-2.5 mb-5">
               {templates.map((t) => (
-                <div key={t._id} onClick={() => setSelectedTemplateId(t._id)} style={{ padding: "14px 16px", borderRadius: "10px", cursor: "pointer", border: selectedTemplateId === t._id ? "2px solid #3b82f6" : "1px solid var(--color-border)", background: selectedTemplateId === t._id ? "rgba(59,130,246,0.08)" : "rgba(255,255,255,0.02)", transition: "all 0.15s ease" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ fontSize: "24px" }}>{t.icon}</span>
-                    <div>
-                      <p style={{ fontSize: "14px", fontWeight: "600" }}>{t.name}</p>
-                      <p style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>{t.description}</p>
+                <div key={t._id} onClick={() => setSelectedTemplateId(t._id)} className={`p-4 rounded-xl cursor-pointer border transition-all ${selectedTemplateId === t._id ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-surface hover:bg-surface-hover"}`}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl flex-shrink-0">{t.icon}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-text-primary truncate">{t.name}</p>
+                      <p className="text-xs text-text-muted truncate">{t.description}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={closeModal} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
-            <button onClick={handleCreateFromTemplate} disabled={isSaving || !selectedTemplateId} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Creating..." : "Create Department"}</button>
+          <div className="flex gap-2">
+            <Button onClick={closeModal} variant="secondary" className="flex-1">Cancel</Button>
+            <Button onClick={handleCreateFromTemplate} disabled={isSaving || !selectedTemplateId} className="flex-1">{isSaving ? "Creating..." : "Create Department"}</Button>
           </div>
         </Modal>
       )}
@@ -380,18 +378,36 @@ export default function DepartmentsPage() {
       {/* Modal: Create Custom */}
       {modal === "create-custom" && (
         <Modal onClose={closeModal}>
-          <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Create Custom Department</h2>
-          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "24px" }}>Build a department from scratch</p>
-          <Field label="Icon"><input value={customForm.icon} onChange={(e) => setCustomForm(p => ({ ...p, icon: e.target.value }))} style={{ ...inputStyle, maxWidth: "80px" }} placeholder="📁" /></Field>
-          <Field label="Department Name *"><input value={customForm.name} onChange={(e) => setCustomForm(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="e.g. Marketing" /></Field>
-          <Field label="Department Code *">
-            <input value={customForm.code} onChange={(e) => setCustomForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} style={inputStyle} placeholder="e.g. MKT" maxLength={10} />
-            <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "4px" }}>Short unique code, letters only</p>
-          </Field>
-          <Field label="Description"><textarea value={customForm.description} onChange={(e) => setCustomForm(p => ({ ...p, description: e.target.value }))} style={{ ...inputStyle, minHeight: "80px", resize: "vertical" } as React.CSSProperties} placeholder="What does this department do?" /></Field>
-          <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-            <button onClick={closeModal} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
-            <button onClick={handleCreateCustom} disabled={isSaving} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Creating..." : "Create Department"}</button>
+          <h2 className="text-lg font-bold text-text-primary mb-1">Create Custom Department</h2>
+          <p className="text-xs text-text-muted mb-5">Build a department from scratch</p>
+          
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="col-span-1">
+              <Field label="Icon">
+                <input value={customForm.icon} onChange={(e) => setCustomForm(p => ({ ...p, icon: e.target.value }))} className="dark-input" placeholder="📁" />
+              </Field>
+            </div>
+            <div className="col-span-2">
+              <Field label="Department Name *">
+                <input value={customForm.name} onChange={(e) => setCustomForm(p => ({ ...p, name: e.target.value }))} className="dark-input" placeholder="e.g. Marketing" />
+              </Field>
+            </div>
+            <div className="col-span-2">
+              <Field label="Department Code *">
+                <input value={customForm.code} onChange={(e) => setCustomForm(p => ({ ...p, code: e.target.value.toUpperCase() }))} className="dark-input" placeholder="e.g. MKT" maxLength={10} />
+                <p className="text-[10px] text-text-muted mt-1">Short unique code, letters only</p>
+              </Field>
+            </div>
+            <div className="col-span-2">
+              <Field label="Description">
+                <textarea value={customForm.description} onChange={(e) => setCustomForm(p => ({ ...p, description: e.target.value }))} className="dark-input min-h-[80px] resize-y" placeholder="What does this department do?" />
+              </Field>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={closeModal} variant="secondary" className="flex-1">Cancel</Button>
+            <Button onClick={handleCreateCustom} disabled={isSaving} className="flex-1">{isSaving ? "Creating..." : "Create Department"}</Button>
           </div>
         </Modal>
       )}
@@ -399,101 +415,104 @@ export default function DepartmentsPage() {
       {/* Modal: View Details */}
       {modal === "view" && selected && (
         <Modal onClose={closeModal}>
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "40px" }}>{selected.icon}</span>
-            <div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700" }}>{selected.name}</h2>
-              <p style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>Code: {selected.code}</p>
+          <div className="flex items-center gap-3.5 mb-5">
+            <span className="text-4xl">{selected.icon}</span>
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold text-text-primary truncate">{selected.name}</h2>
+              <p className="text-xs text-text-muted">Code: {selected.code}</p>
             </div>
           </div>
-          {selected.description && <p style={{ fontSize: "14px", color: "var(--color-text-muted)", marginBottom: "20px", lineHeight: 1.6 }}>{selected.description}</p>}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
+          
+          {selected.description && <p className="text-sm text-text-secondary leading-relaxed mb-5">{selected.description}</p>}
+          
+          <div className="grid grid-cols-2 gap-3 mb-5">
             {[
               { label: "Members",        value: selected.members.length },
               { label: "Type",           value: selected.isFromTemplate ? "Template" : "Custom" },
               { label: "Doc Visibility", value: selected.permissions.documentVisibility },
               { label: "Mandatory",      value: selected.isMandatory ? "Yes" : "No" },
             ].map((item) => (
-              <div key={item.label} style={{ padding: "12px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
-                <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginBottom: "4px" }}>{item.label}</p>
-                <p style={{ fontSize: "14px", fontWeight: "600" }}>{item.value}</p>
+              <div key={item.label} className="p-3 rounded-xl bg-surface border border-border">
+                <p className="text-[10px] text-text-muted mb-1 font-bold">{item.label}</p>
+                <p className="text-sm font-bold text-text-primary">{item.value}</p>
               </div>
             ))}
           </div>
-          <p style={{ fontSize: "12px", fontWeight: "600", color: "var(--color-text-muted)", marginBottom: "10px" }}>ALL MEMBERS</p>
+          
+          <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2.5">ALL MEMBERS</p>
           {selected.members.length === 0 ? (
-            <p style={{ fontSize: "13px", color: "var(--color-text-muted)", opacity: 0.5 }}>No members yet</p>
+            <p className="text-xs text-text-muted italic opacity-60">No members yet</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
               {selected.members.map((m) => {
-    const rs = getRoleBadgeStyle(m.role);
-    return (
-        <div key={m._id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
-            <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700", color: "#fff" }}>
-                {m.name?.[0]?.toUpperCase()}
-            </div>
-            <div style={{ flex: 1 }}>
-                <p style={{ fontSize: "13px", fontWeight: "600" }}>{m.name}</p>
-                <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{m.email}</p>
-            </div>
-            <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "5px", fontWeight: "600", background: rs.bg, color: rs.color }}>
-                {m.role.replace("_", " ")}
-            </span>
-            <button
-                onClick={() => handleRemoveMember(selected._id, m._id)}
-                style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: "11px", cursor: "pointer", flexShrink: 0 }}
-            >
-                Remove
-            </button>
-        </div>
-    );
-})}
+                const rsClass = getRoleBadgeStyle(m.role);
+                return (
+                  <div key={m._id} className="flex items-center gap-3 p-2.5 rounded-xl bg-surface border border-border">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-sm">
+                      {m.name?.[0]?.toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-text-primary truncate">{m.name}</p>
+                      <p className="text-[10px] text-text-muted truncate">{m.email}</p>
+                    </div>
+                    <span className={`text-[9px] px-2 py-0.5 rounded font-medium ${rsClass} mr-2`}>
+                      {m.role.replace("_", " ")}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveMember(selected._id, m._id)}
+                      className="px-2 py-1 rounded bg-error/10 border border-error/20 text-error text-[10px] hover:bg-error/20 font-bold transition-all"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
-          <button onClick={closeModal} style={{ width: "100%", marginTop: "20px", padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Close</button>
+          <Button onClick={closeModal} variant="secondary" className="w-full mt-5">Close</Button>
         </Modal>
       )}
 
       {/* Modal: Add Member */}
       {modal === "add-member" && selected && (
         <Modal onClose={closeModal}>
-          <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Add Member</h2>
-          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "20px" }}>Add a member to <strong>{selected.name}</strong></p>
+          <h2 className="text-lg font-bold text-text-primary mb-1">Add Member</h2>
+          <p className="text-xs text-text-muted mb-4">Add a member to <strong>{selected.name}</strong></p>
           <Field label="Search Members">
-            <input value={memberSearch} onChange={(e) => { setMemberSearch(e.target.value); setSelectedUserId(""); }} style={inputStyle} placeholder="Search by name or email..." autoFocus />
+            <input value={memberSearch} onChange={(e) => { setMemberSearch(e.target.value); setSelectedUserId(""); }} className="dark-input" placeholder="Search by name or email..." autoFocus />
           </Field>
-          <div style={{ maxHeight: "260px", overflowY: "auto", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div className="max-h-[260px] overflow-y-auto mb-4 flex flex-col gap-2">
             {availableMembers.length === 0 ? (
-              <div style={{ padding: "20px", textAlign: "center", opacity: 0.5 }}>
-                <p style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>{memberSearch ? "No members match your search" : "All org members are already in this department"}</p>
+              <div className="py-8 text-center opacity-60">
+                <p className="text-xs text-text-muted">{memberSearch ? "No members match your search" : "All org members are already in this department"}</p>
               </div>
             ) : (
               availableMembers.map((m) => {
-                const rs = getRoleBadgeStyle(m.role);
+                const rsClass = getRoleBadgeStyle(m.role);
                 const isSelected = selectedUserId === m._id;
                 return (
-                  <div key={m._id} onClick={() => setSelectedUserId(m._id)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", border: isSelected ? "2px solid #3b82f6" : "1px solid var(--color-border)", background: isSelected ? "rgba(59,130,246,0.08)" : "rgba(255,255,255,0.02)", transition: "all 0.15s ease" }}>
-                    <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "linear-gradient(135deg, #3b82f6, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "700", color: "#fff", flexShrink: 0 }}>{m.name?.[0]?.toUpperCase()}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: "13px", fontWeight: "600", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.name}</p>
-                      <p style={{ fontSize: "11px", color: "var(--color-text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.email}</p>
-                      {m.department && <p style={{ fontSize: "10px", color: "#f59e0b", marginTop: "2px" }}>Currently in: {m.department.name}</p>}
+                  <div key={m._id} onClick={() => setSelectedUserId(m._id)} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all ${isSelected ? "border-primary bg-primary/5" : "border-border bg-surface hover:bg-surface-hover"}`}>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-sm">{m.name?.[0]?.toUpperCase()}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-text-primary truncate">{m.name}</p>
+                      <p className="text-[10px] text-text-muted truncate">{m.email}</p>
+                      {m.department && <p className="text-[9px] text-warning mt-0.5">Currently in: {m.department.name}</p>}
                     </div>
-                    <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "5px", fontWeight: "600", background: rs.bg, color: rs.color, whiteSpace: "nowrap" }}>{m.role.replace("_", " ")}</span>
-                    {isSelected && <span style={{ color: "#3b82f6", fontSize: "16px" }}>✓</span>}
+                    <span className={`text-[9px] px-2 py-0.5 rounded font-medium ${rsClass}`}>{m.role.replace("_", " ")}</span>
+                    {isSelected && <span className="text-primary font-bold text-sm ml-1">✓</span>}
                   </div>
                 );
               })
             )}
           </div>
           {selectedUserId && (
-            <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: "16px" }}>
-              <p style={{ fontSize: "12px", color: "#10b981" }}>✓ Selected: <strong>{orgMembers.find(m => m._id === selectedUserId)?.name}</strong></p>
+            <div className="p-3 rounded-xl bg-success/10 border border-success/20 mb-4 text-xs text-success font-medium">
+              ✓ Selected: <strong>{orgMembers.find(m => m._id === selectedUserId)?.name}</strong>
             </div>
           )}
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={closeModal} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
-            <button onClick={handleAddMember} disabled={isSaving || !selectedUserId} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Adding..." : "Add Member"}</button>
+          <div className="flex gap-2">
+            <Button onClick={closeModal} variant="secondary" className="flex-1">Cancel</Button>
+            <Button onClick={handleAddMember} disabled={isSaving || !selectedUserId} className="flex-1">{isSaving ? "Adding..." : "Add Member"}</Button>
           </div>
         </Modal>
       )}
@@ -501,14 +520,14 @@ export default function DepartmentsPage() {
       {/* Modal: Access Matrix */}
       {modal === "access-matrix" && selected && (
         <Modal onClose={closeModal}>
-          <h2 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "6px" }}>Cross-Department Access</h2>
-          <p style={{ fontSize: "13px", color: "var(--color-text-muted)", marginBottom: "20px" }}>
+          <h2 className="text-lg font-bold text-text-primary mb-1">Cross-Department Access</h2>
+          <p className="text-xs text-text-muted mb-4">
             Members of <strong>{selected.name}</strong> can also read documents from:
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px", maxHeight: "300px", overflowY: "auto" }}>
+          <div className="flex flex-col gap-2 mb-4 max-h-[300px] overflow-y-auto">
             {departments.filter(d => d._id !== selected._id).length === 0 ? (
-              <p style={{ fontSize: "13px", color: "var(--color-text-muted)", opacity: 0.5, textAlign: "center", padding: "20px" }}>No other departments yet</p>
+              <p className="text-xs text-text-muted text-center py-5 opacity-60">No other departments yet</p>
             ) : (
               departments.filter(d => d._id !== selected._id).map(d => {
                 const isChecked = accessDeptIds.includes(d._id);
@@ -516,14 +535,14 @@ export default function DepartmentsPage() {
                   <div
                     key={d._id}
                     onClick={() => setAccessDeptIds(prev => isChecked ? prev.filter(id => id !== d._id) : [...prev, d._id])}
-                    style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px", borderRadius: "10px", cursor: "pointer", border: isChecked ? "2px solid #a855f7" : "1px solid var(--color-border)", background: isChecked ? "rgba(168,85,247,0.08)" : "rgba(255,255,255,0.02)", transition: "all 0.15s ease" }}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all ${isChecked ? "border-secondary bg-secondary/5" : "border-border bg-surface hover:bg-surface-hover"}`}
                   >
-                    <span style={{ fontSize: "20px" }}>{d.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: "13px", fontWeight: "600" }}>{d.name}</p>
-                      <p style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{d.code}</p>
+                    <span className="text-2xl flex-shrink-0">{d.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-text-primary truncate">{d.name}</p>
+                      <p className="text-[10px] text-text-muted">{d.code}</p>
                     </div>
-                    <div style={{ width: "18px", height: "18px", borderRadius: "4px", border: isChecked ? "2px solid #a855f7" : "2px solid var(--color-border)", background: isChecked ? "#a855f7" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", color: "#fff", flexShrink: 0 }}>
+                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center text-xs font-bold transition-all ${isChecked ? "border-secondary bg-secondary text-white" : "border-border bg-transparent"}`}>
                       {isChecked && "✓"}
                     </div>
                   </div>
@@ -533,19 +552,18 @@ export default function DepartmentsPage() {
           </div>
 
           {accessDeptIds.length > 0 && (
-            <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", marginBottom: "16px" }}>
-              <p style={{ fontSize: "12px", color: "#a855f7" }}>✓ Access granted to {accessDeptIds.length} department{accessDeptIds.length > 1 ? "s" : ""}</p>
+            <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-4 text-xs text-secondary font-medium">
+              ✓ Access granted to {accessDeptIds.length} department{accessDeptIds.length > 1 ? "s" : ""}
             </div>
           )}
 
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={closeModal} style={{ flex: 1, padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer", fontSize: "14px" }}>Cancel</button>
-            <button onClick={handleUpdateAccessMatrix} disabled={isSaving} className="gradient-button" style={{ flex: 1, padding: "10px", fontSize: "14px" }}>{isSaving ? "Saving..." : "Save Access"}</button>
+          <div className="flex gap-2">
+            <Button onClick={closeModal} variant="secondary" className="flex-1">Cancel</Button>
+            <Button onClick={handleUpdateAccessMatrix} disabled={isSaving} className="flex-1">{isSaving ? "Saving..." : "Save Access"}</Button>
           </div>
         </Modal>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </DashboardLayout>
   );
 }

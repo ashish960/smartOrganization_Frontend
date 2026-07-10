@@ -10,12 +10,14 @@ interface DashboardLayoutProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
+  noScroll?: boolean;
 }
 
 export default function DashboardLayout({
   children,
   title,
   subtitle,
+  noScroll = false,
 }: DashboardLayoutProps) {
   const router = useRouter();
   const { user, isAuthenticated, logoutUser } = useAuth();
@@ -38,12 +40,7 @@ export default function DashboardLayout({
   const firstName = userName.split(" ")[0];
 
   return (
-    <div style={{
-      display: "flex",
-      minHeight: "100vh",
-      background: "var(--color-bg)",
-      color: "var(--color-text)",
-    }}>
+    <div className="flex h-screen bg-background text-text-primary overflow-hidden selection:bg-primary/30">
       <Sidebar
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((prev) => !prev)}
@@ -52,22 +49,16 @@ export default function DashboardLayout({
         onLogout={handleLogout}
       />
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <div className="flex flex-col flex-1 min-w-0">
         <Topbar
           title={title}
           subtitle={subtitle ?? `Welcome back, ${firstName} 👋`}
           userName={userName}
         />
-        <main style={{
-          flex: 1,
-          padding: "28px 24px",
-          overflowY: "auto",
-        }}>
+        <main className={`flex-1 p-6 md:p-8 ${noScroll ? "overflow-hidden" : "overflow-y-auto"}`}>
           {children}
         </main>
       </div>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
