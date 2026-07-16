@@ -1,8 +1,9 @@
 "use client";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
-export default function ComingSoonPage() {
+function ComingSoonContent() {
   const searchParams = useSearchParams();
   const feature = searchParams.get("feature") ?? "This feature";
 
@@ -19,5 +20,19 @@ export default function ComingSoonPage() {
         </p>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function ComingSoonPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout title="Feature">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
+          <p style={{ fontSize: "14px", opacity: 0.5 }}>Loading feature details...</p>
+        </div>
+      </DashboardLayout>
+    }>
+      <ComingSoonContent />
+    </Suspense>
   );
 }

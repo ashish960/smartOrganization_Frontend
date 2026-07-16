@@ -1,0 +1,21 @@
+# dependencies
+/node_modules
+/frontend/node_modules
+
+# next.js
+/frontend/.next/
+/frontend/out/
+
+# env files
+.env*
+/frontend/.env*
+
+# production
+/frontend/build
+/frontend/.next
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
