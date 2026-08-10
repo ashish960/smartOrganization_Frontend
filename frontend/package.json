@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "clean": "rm -rf .next node_modules/.cache .turbo",
-    "dev": "npm run clean && next dev -p 3000",
-    "build": "npm run clean && next build",
+    "clean": "next dev",
+    "dev": "next dev -p 3000",
+    "build": "next build",
     "start": "next start -p 3000",
-    "restart": "killall node; sleep 1; npm run dev",
     "dev_home": "next dev -p 3000",
-    "build_home": "npm run clean && next build",
+    "build_home": "next build",
     "start_home": "next start -p 3000"
   },
   "dependencies": {

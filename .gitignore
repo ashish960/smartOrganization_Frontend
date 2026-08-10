@@ -3,7 +3,7 @@
 /frontend/node_modules
 
 # next.js
-/frontend/.next/
+/frontend/.next/cache/
 /frontend/out/
 
 # env files
