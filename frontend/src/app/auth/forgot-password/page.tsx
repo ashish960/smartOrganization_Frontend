@@ -28,7 +28,6 @@ export default function ForgotPasswordPage() {
     marginTop: "6px",
   };
 
-  // ── Step 1: Send OTP ────────────────────────────────────────────────────
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return setError("Email is required");
@@ -50,7 +49,6 @@ export default function ForgotPasswordPage() {
     } finally { setIsLoading(false); }
   };
 
-  // ── Step 2: Verify OTP ──────────────────────────────────────────────────
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp || otp.length !== 6) return setError("Enter the 6-digit OTP");
@@ -73,7 +71,6 @@ export default function ForgotPasswordPage() {
     } finally { setIsLoading(false); }
   };
 
-  // ── Step 3: Reset Password ─────────────────────────────────────────────
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPassword || newPassword.length < 8) return setError("Password must be at least 8 characters");
@@ -96,7 +93,6 @@ export default function ForgotPasswordPage() {
     } finally { setIsLoading(false); }
   };
 
-  // ── Step indicator ─────────────────────────────────────────────────────
   const steps = ["email", "otp", "password"];
   const stepIndex = steps.indexOf(step);
 
@@ -106,7 +102,6 @@ export default function ForgotPasswordPage() {
       subtitle="We'll send an OTP to your email"
       footerLink={{ text: "Remember your password?", linkText: "Sign In", href: "/auth/login" }}
     >
-      {/* Step indicator */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "28px" }}>
         {["Email", "Verify OTP", "New Password"].map((label, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -129,21 +124,18 @@ export default function ForgotPasswordPage() {
         ))}
       </div>
 
-      {/* Success message */}
       {success && (
         <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", color: "#10b981", fontSize: "13px", marginBottom: "16px" }}>
           ✅ {success}
         </div>
       )}
 
-      {/* Error message */}
       {error && (
         <div style={{ padding: "10px 14px", borderRadius: "8px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: "13px", marginBottom: "16px" }}>
           ❌ {error}
         </div>
       )}
 
-      {/* Step 1: Email */}
       {step === "email" && (
         <form onSubmit={handleSendOTP} className="space-y-4">
           <div>
@@ -157,7 +149,6 @@ export default function ForgotPasswordPage() {
         </form>
       )}
 
-      {/* Step 2: OTP */}
       {step === "otp" && (
         <form onSubmit={handleVerifyOTP} className="space-y-4">
           <div>
@@ -182,7 +173,6 @@ export default function ForgotPasswordPage() {
         </form>
       )}
 
-      {/* Step 3: New Password */}
       {step === "password" && (
         <form onSubmit={handleResetPassword} className="space-y-4">
           <div>

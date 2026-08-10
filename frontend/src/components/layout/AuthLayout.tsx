@@ -14,18 +14,14 @@ interface AuthLayoutProps {
 const AuthLayout = ({ children, title, subtitle, footerLink }: AuthLayoutProps) => {
   return (
     <div className="auth-background flex items-center justify-center p-4 min-h-screen relative overflow-hidden bg-background">
-      {/* Glowing orbs */}
       <div className="orb-blue absolute w-[500px] h-[500px] -top-[100px] -left-[100px] rounded-full mix-blend-screen opacity-30 animate-blob bg-primary/30 blur-[60px]" />
       <div className="orb-purple absolute w-[600px] h-[600px] top-[50%] -right-[150px] rounded-full mix-blend-screen opacity-30 animate-blob animation-delay-2000 bg-secondary/30 blur-[60px]" />
       <div className="orb-cyan absolute w-[400px] h-[400px] -bottom-[100px] left-[30%] rounded-full mix-blend-screen opacity-20 animate-blob animation-delay-4000 bg-cyan-500/30 blur-[60px]" />
 
-      {/* Grid pattern */}
       <div className="absolute inset-0 opacity-5 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:50px_50px]" />
 
-      {/* Main Container */}
       <div className="relative w-full max-w-lg z-10">
 
-        {/* Logo/Branding */}
         <div className="text-center mb-8">
           <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-glow flex items-center justify-center">
             <svg
@@ -54,10 +50,8 @@ const AuthLayout = ({ children, title, subtitle, footerLink }: AuthLayoutProps) 
           )}
         </div>
 
-        {/* Glass Card */}
         <div className="bg-surface/60 backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-8">
 
-          {/* Title */}
           <div className="text-center mb-8 flex flex-col items-center">
             <h2 className="text-2xl font-bold text-text-primary tracking-tight">
               {title}
@@ -65,12 +59,10 @@ const AuthLayout = ({ children, title, subtitle, footerLink }: AuthLayoutProps) 
             <div className="h-1 w-16 mt-3 rounded-full bg-gradient-to-r from-primary to-secondary" />
           </div>
 
-          {/* Form Content */}
           <div className="mb-6">
             {children}
           </div>
 
-          {/* Footer Link */}
           {footerLink && (
             <div className="text-center pt-6 mt-2 border-t border-border">
               <p className="text-sm text-text-muted">
@@ -86,7 +78,6 @@ const AuthLayout = ({ children, title, subtitle, footerLink }: AuthLayoutProps) 
           )}
         </div>
 
-        {/* Copyright */}
         <div className="text-center mt-8">
           <p className="text-xs text-text-muted opacity-80">
             © {new Date().getFullYear()} SmartOrg AI. All rights reserved.

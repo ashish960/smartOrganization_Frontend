@@ -79,7 +79,6 @@ export default function LoginPage() {
       }}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Email */}
         <div>
           <label className="dark-label">Email Address</label>
           <input
@@ -96,7 +95,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Password */}
         <div>
           <div className="flex justify-between items-center mb-2">
             <label className="dark-label !mb-0">
@@ -123,7 +121,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}

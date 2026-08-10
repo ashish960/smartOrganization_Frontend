@@ -1,4 +1,3 @@
-// All SVG icons used across the app — import from here, never inline
 
 export const Icons = {
   Dashboard: () => (

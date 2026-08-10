@@ -12,7 +12,6 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // Register
     registerStart: (state) => {
       state.isLoading = true;
       state.error = null;
@@ -23,7 +22,6 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
       state.error = null;
-      // Save token to localStorage
       localStorage.setItem("token", action.payload.token);
       localStorage.setItem("user", JSON.stringify(action.payload.user));
     },
@@ -33,7 +31,6 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     },
 
-    // Login
     loginStart: (state) => {
       state.isLoading = true;
       state.error = null;
@@ -44,7 +41,6 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
       state.error = null;
-      // Save token to localStorage
       localStorage.setItem("token", action.payload.token);
       localStorage.setItem("user", JSON.stringify(action.payload.user));
     },
@@ -54,18 +50,15 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     },
 
-    // Logout
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
-      // Remove token from localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
 
-    // Restore from localStorage
     restoreAuth: (state, action) => {
       state.token = action.payload.token;
       state.user = action.payload.user;

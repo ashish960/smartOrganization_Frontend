@@ -29,7 +29,6 @@ export default function Sidebar({
         isOpen ? "w-64" : "w-[72px]"
       }`}
     >
-      {/* ── Logo + Toggle ── */}
       <div
         className={`flex items-center px-4 py-5 border-b border-border transition-all duration-300 ${
           isOpen ? "justify-between" : "justify-center"
@@ -48,7 +47,6 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* ── Org Badge ── */}
       {isOpen && (
         <div className="mx-4 mt-4 mb-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
           <p className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">
@@ -60,7 +58,6 @@ export default function Sidebar({
         </div>
       )}
 
-      {/* ── Navigation ── */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const IconComp = Icons[item.icon];
@@ -92,7 +89,6 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* ── User + Logout ── */}
       <div className="p-4 border-t border-border">
         {isOpen ? (
           <div className="flex items-center gap-3">

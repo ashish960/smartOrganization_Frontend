@@ -9,7 +9,6 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface DocItem {
     _id: string;
     fileType: string;
@@ -86,7 +85,6 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     return null;
 };
 
-// ── Build analytics from raw data ──────────────────────────────────────────
 const buildAnalytics = (
     docs: DocItem[],
     members: MemberItem[],
@@ -105,7 +103,6 @@ const buildAnalytics = (
         return inDate && inDept;
     });
 
-    // Documents over time
     const docsByDay: Record<string, number> = {};
     const numDays = Math.min(days, 30);
     for (let i = numDays - 1; i >= 0; i--) {
@@ -119,7 +116,6 @@ const buildAnalytics = (
     });
     const documentsOverTime = Object.entries(docsByDay).map(([date, count]) => ({ date, count }));
 
-    // By department
     const deptCounts: Record<string, number> = {};
     filteredDocs.forEach(doc => {
         const name = doc.department?.name || "No Department";
@@ -129,7 +125,6 @@ const buildAnalytics = (
         name, count, color: DEPT_COLORS[i % DEPT_COLORS.length]
     }));
 
-    // By file type
     const typeCounts: Record<string, number> = {};
     filteredDocs.forEach(doc => {
         const t = doc.fileType?.toUpperCase() || "OTHER";
@@ -139,14 +134,12 @@ const buildAnalytics = (
         name, value, color: TYPE_COLORS[i % TYPE_COLORS.length]
     }));
 
-    // Member activity
     const memberActivity = members.slice(0, 10).map(m => ({
         name: m.name,
         documents: filteredDocs.filter(d => d.uploadedBy?._id === m._id).length,
         department: m.department?.name || "No Department",
     })).sort((a, b) => b.documents - a.documents);
 
-    // Recent activity
     const recentActivity = filteredDocs.slice(0, 10).map(doc => ({
         action: "Uploaded document",
         user: doc.uploadedBy?.name || "Unknown",
@@ -177,7 +170,6 @@ const buildAnalytics = (
     };
 };
 
-// ── Component ──────────────────────────────────────────────────────────────
 export default function AnalyticsPage() {
     const { token } = useSelector((state: AppRootState) => state.auth);
 
@@ -248,7 +240,6 @@ export default function AnalyticsPage() {
 
             {error && <div style={{ marginBottom: "16px", padding: "12px 20px", borderRadius: "10px", background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontSize: "14px" }}>❌ {error}</div>}
 
-            {/* Filters */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "13px", color: "var(--color-text-muted)", fontWeight: "600" }}>VIEW</span>
                 <select value={dateRange} onChange={(e) => setDateRange(e.target.value)} style={selectStyle}>
@@ -265,7 +256,6 @@ export default function AnalyticsPage() {
                 <button onClick={() => setRefresh(p => p + 1)} style={{ padding: "8px 14px", borderRadius: "8px", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6", fontSize: "13px", cursor: "pointer", fontWeight: "600" }}>↻ Refresh</button>
             </div>
 
-            {/* Overview cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px", marginBottom: "28px" }}>
                 {[
                     { label: "Total Documents", value: data.overview.totalDocuments, sub: `+${data.overview.documentsChange} in period`, color: "#3b82f6", bg: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.2)", icon: "📄" },
@@ -284,7 +274,6 @@ export default function AnalyticsPage() {
                 ))}
             </div>
 
-            {/* Storage bar */}
             <div style={{ padding: "16px 20px", borderRadius: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", marginBottom: "28px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                     <span style={{ fontSize: "13px", fontWeight: "600" }}>💾 Storage Usage</span>
@@ -296,7 +285,6 @@ export default function AnalyticsPage() {
                 <p style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: "6px" }}>{storagePercent}% used</p>
             </div>
 
-            {/* Charts row 1 */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
                 <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
                     <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "20px" }}>📄 Documents Uploaded</h3>
@@ -337,7 +325,6 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            {/* Charts row 2 */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
                 <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
                     <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "20px" }}>🏢 Documents by Department</h3>
@@ -390,7 +377,6 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            {/* Member activity */}
             <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)", marginBottom: "24px" }}>
                 <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "20px" }}>👥 Member Activity</h3>
                 {data.memberActivity.length === 0 ? (
@@ -409,7 +395,6 @@ export default function AnalyticsPage() {
                 )}
             </div>
 
-            {/* Recent activity */}
             <div style={{ padding: "20px", borderRadius: "14px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--color-border)" }}>
                 <h3 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "16px" }}>🕐 Recent Activity</h3>
                 {data.recentActivity.length === 0 ? (

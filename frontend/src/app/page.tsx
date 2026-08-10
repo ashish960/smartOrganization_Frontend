@@ -7,7 +7,6 @@ export default function RootPage() {
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col transition-colors duration-300">
       
-      {/* ── Navbar ── */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -36,9 +35,7 @@ export default function RootPage() {
         </div>
       </header>
 
-      {/* ── Hero Section ── */}
       <section className="relative py-20 lg:py-28 overflow-hidden px-6">
-        {/* Glow decorative effects */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none z-0" />
         <div className="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-secondary/10 rounded-full blur-[100px] pointer-events-none z-0" />
 
@@ -67,7 +64,6 @@ export default function RootPage() {
           </div>
 
           <div className="flex-1 w-full max-w-[560px] lg:max-w-none">
-            {/* Glowing UI card mock */}
             <div className="p-1 rounded-3xl bg-gradient-to-br from-primary/30 to-secondary/30 shadow-2xl backdrop-blur-sm border border-white/5">
               <div className="bg-surface rounded-[22px] overflow-hidden border border-border/40 p-5 flex flex-col gap-4">
                 <div className="flex items-center justify-between border-b border-border pb-3">
@@ -92,7 +88,6 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* ── Features Section ── */}
       <section id="features" className="py-20 bg-surface/30 border-t border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
@@ -143,7 +138,6 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* ── How it Works ── */}
       <section id="how-it-works" className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
@@ -175,7 +169,6 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* ── Interactive Demo Section ── */}
       <section id="chat-demo" className="py-20 bg-surface/30 border-t border-b border-border px-6 transition-colors">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
@@ -184,7 +177,6 @@ export default function RootPage() {
           </div>
 
           <div className="rounded-2xl border border-border bg-surface overflow-hidden shadow-lg flex flex-col min-h-[300px]">
-            {/* Header */}
             <div className="px-4 py-3 bg-surface-hover border-b border-border flex items-center gap-2.5">
               <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-semibold">🤖</span>
               <div>
@@ -193,7 +185,6 @@ export default function RootPage() {
               </div>
             </div>
 
-            {/* Chat Body */}
             <div className="p-4 flex-1 flex flex-col gap-4 text-xs sm:text-sm justify-end">
               <div className="flex gap-2.5 items-start">
                 <span className="w-6 h-6 rounded-full bg-surface-hover border border-border flex items-center justify-center text-xs">🤖</span>
@@ -202,7 +193,6 @@ export default function RootPage() {
                 </div>
               </div>
 
-              {/* simulated response state */}
               <div className="flex gap-2.5 items-start justify-end flex-row-reverse">
                 <span className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center text-[10px]">👤</span>
                 <div className="p-3 bg-primary text-white rounded-l-xl rounded-br-xl max-w-[85%] font-medium">
@@ -226,7 +216,6 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
       <footer className="mt-auto border-t border-border bg-surface transition-colors">
         <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="flex flex-col gap-4">

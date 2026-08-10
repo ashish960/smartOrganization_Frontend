@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 import { AppRootState } from "@/store";
 import Button from "@/components/ui/Button";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface Member {
   _id: string;
   name: string;
@@ -221,7 +220,6 @@ export default function DepartmentsPage() {
       {success && <div className="fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl bg-success/10 border border-success/30 text-success text-sm font-medium backdrop-blur-md shadow-lg">✅ {success}</div>}
       {error   && <div className="fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm font-medium backdrop-blur-md shadow-lg">❌ {error} <button onClick={() => setError(null)} className="ml-3 text-error hover:opacity-80">✕</button></div>}
 
-      {/* Top bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <input type="text" placeholder="Search departments..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1 min-w-[200px] max-w-[340px] px-4 py-2.5 rounded-xl bg-surface border border-border text-text-primary text-sm outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all shadow-sm" />
@@ -231,7 +229,6 @@ export default function DepartmentsPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="flex flex-wrap gap-4 mb-6">
         {[
           { label: "Total Departments", value: departments.length,                                     color: "text-primary", bg: "bg-primary/5" },
@@ -246,7 +243,6 @@ export default function DepartmentsPage() {
         ))}
       </div>
 
-      {/* Grid */}
       {isLoading ? (
         <div className="flex justify-center py-20 opacity-50">
           <div className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
@@ -315,7 +311,6 @@ export default function DepartmentsPage() {
                   )}
                 </div>
 
-                {/* Cross-access badge */}
                 {dept.permissions.canAccessDepartments.length > 0 && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/5 border border-secondary/15">
                     <span className="text-xs">🔗</span>
@@ -346,7 +341,6 @@ export default function DepartmentsPage() {
         </div>
       )}
 
-      {/* Modal: Create from Template */}
       {modal === "create-template" && (
         <Modal onClose={closeModal}>
           <h2 className="text-lg font-bold text-text-primary mb-1">Create from Template</h2>
@@ -375,7 +369,6 @@ export default function DepartmentsPage() {
         </Modal>
       )}
 
-      {/* Modal: Create Custom */}
       {modal === "create-custom" && (
         <Modal onClose={closeModal}>
           <h2 className="text-lg font-bold text-text-primary mb-1">Create Custom Department</h2>
@@ -412,7 +405,6 @@ export default function DepartmentsPage() {
         </Modal>
       )}
 
-      {/* Modal: View Details */}
       {modal === "view" && selected && (
         <Modal onClose={closeModal}>
           <div className="flex items-center gap-3.5 mb-5">
@@ -473,7 +465,6 @@ export default function DepartmentsPage() {
         </Modal>
       )}
 
-      {/* Modal: Add Member */}
       {modal === "add-member" && selected && (
         <Modal onClose={closeModal}>
           <h2 className="text-lg font-bold text-text-primary mb-1">Add Member</h2>
@@ -517,7 +508,6 @@ export default function DepartmentsPage() {
         </Modal>
       )}
 
-      {/* Modal: Access Matrix */}
       {modal === "access-matrix" && selected && (
         <Modal onClose={closeModal}>
           <h2 className="text-lg font-bold text-text-primary mb-1">Cross-Department Access</h2>

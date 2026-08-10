@@ -47,7 +47,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   
-  // Notification states
   const [activeTab, setActiveTab] = useState<"latest" | "history">("latest");
   const [latestNotifications, setLatestNotifications] = useState<NotificationItem[]>([]);
   const [historyNotifications, setHistoryNotifications] = useState<NotificationItem[]>([]);
@@ -221,7 +220,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
 
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-6 bg-surface/80 backdrop-blur-lg border-b border-border shadow-sm">
-      {/* Left: page title */}
       <div>
         <h1 className="text-xl font-bold tracking-tight text-text-primary">{title}</h1>
         {subtitle && (
@@ -229,11 +227,9 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
         )}
       </div>
 
-      {/* Right: theme toggle, bell + avatar */}
       <div className="flex items-center gap-4">
         <ThemeToggle />
         
-        {/* Notifications Bell */}
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => {
@@ -248,7 +244,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
             className="relative p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors focus:outline-none"
           >
             <Icons.Bell />
-            {/* notification badge */}
             {unreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary text-white text-[9px] font-bold border-2 border-surface flex items-center justify-center">
                 {unreadCount}
@@ -256,11 +251,9 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
             )}
           </button>
 
-          {/* Notifications Dropdown Panel */}
           {notificationsOpen && (
             <div className="absolute right-0 top-12 mt-2 w-80 rounded-xl bg-surface border border-border p-2 shadow-xl z-50 animate-fade-in flex flex-col gap-2.5">
               
-              {/* Header */}
               <div className="flex items-center justify-between px-3 pt-2 pb-1 select-none">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-text-primary">Notifications</span>
@@ -288,7 +281,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
                 </div>
               </div>
 
-              {/* Tabs */}
               <div className="flex border-b border-border/50 select-none">
                 <button 
                   onClick={() => setActiveTab("latest")}
@@ -312,7 +304,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
                 </button>
               </div>
 
-              {/* Items List */}
               <div className="overflow-y-auto flex-1 pr-1 flex flex-col gap-1.5 min-h-[160px] max-h-[280px] custom-scrollbar">
                 {activeList.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center opacity-65 gap-1.5">
@@ -333,7 +324,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
                           n.read ? "bg-transparent hover:bg-surface-hover" : "bg-primary/5 hover:bg-primary/10 border-primary/10"
                         }`}
                       >
-                        {/* Notification content click-action */}
                         <button
                           onClick={() => handleNotificationClick(n)}
                           className="flex items-start gap-2.5 flex-1 text-left focus:outline-none min-w-0"
@@ -351,7 +341,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
                           </div>
                         </button>
 
-                        {/* Interactive action icons (visible on hover) */}
                         <div className="flex items-center gap-1.5 ml-auto self-start mt-1 opacity-0 group-hover/notif:opacity-100 transition-opacity">
                           {!n.read && (
                             <button 
@@ -371,14 +360,12 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
                           </button>
                         </div>
 
-                        {/* Unread Indicator circle (hidden on hover action trigger) */}
                         {!n.read && (
                           <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-2.5 mr-1 group-hover/notif:hidden" />
                         )}
                       </div>
                     ))}
                     
-                    {/* Lazy loading Load More button */}
                     {activeHasMore && (
                       <button 
                         onClick={handleLoadMore}
@@ -406,13 +393,11 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
 
           {dropdownOpen && (
             <div className="absolute right-0 top-12 mt-2 w-48 rounded-xl bg-surface border border-border p-1.5 shadow-xl z-50 animate-fade-in flex flex-col gap-1">
-              {/* User name header */}
               <div className="px-3 py-2 border-b border-border/50 mb-1 select-none">
                 <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Account</p>
                 <p className="text-xs font-bold text-text-primary truncate mt-0.5">{userName}</p>
               </div>
               
-              {/* My Profile Link */}
               <button 
                 onClick={() => {
                   setDropdownOpen(false);
@@ -427,7 +412,6 @@ export default function Topbar({ title, subtitle, userName }: TopbarProps) {
                 My Profile
               </button>
               
-              {/* Logout Button */}
               <button 
                 onClick={() => {
                   setDropdownOpen(false);

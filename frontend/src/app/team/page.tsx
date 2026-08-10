@@ -174,7 +174,6 @@ export default function TeamPage() {
       {success && <div className="fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl bg-success/10 border border-success/30 text-success text-sm font-medium backdrop-blur-md shadow-lg">✅ {success}</div>}
       {error   && <div className="fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm font-medium backdrop-blur-md shadow-lg">❌ {error} <button onClick={() => setError(null)} className="ml-3 bg-transparent border-none cursor-pointer text-error hover:text-error/80">✕</button></div>}
 
-      {/* Top bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
         <input type="text" placeholder="Search by name or email..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1 min-w-[200px] max-w-[340px] px-4 py-2.5 rounded-xl bg-surface border border-border text-text-primary text-sm outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all shadow-sm" />
@@ -185,7 +184,6 @@ export default function TeamPage() {
         )}
       </div>
 
-      {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3 mb-6 p-4 rounded-2xl bg-surface/50 backdrop-blur-sm border border-border shadow-sm">
         <span className="text-xs text-text-muted font-bold tracking-wider">FILTER BY</span>
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="px-3 py-2 rounded-lg bg-surface border border-border text-text-primary text-sm cursor-pointer outline-none hover:bg-surface-hover transition-colors">
@@ -205,7 +203,6 @@ export default function TeamPage() {
         )}
       </div>
 
-      {/* Stats */}
       <div className="flex flex-wrap gap-4 mb-7">
         {[
           { label: "Total Members", value: members.length,                                        color: "text-primary", bg: "bg-primary/5" },
@@ -220,7 +217,6 @@ export default function TeamPage() {
         ))}
       </div>
 
-      {/* Member grid */}
       {isLoading ? (
         <div className="flex justify-center p-16 opacity-50">
           <div className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
@@ -278,7 +274,6 @@ export default function TeamPage() {
         </div>
       )}
 
-      {/* ── Add Member Modal ── */}
       {showAddMember && (
         <Modal onClose={() => { setShowAddMember(false); setTempPassword(null); setAddForm({ name: "", email: "", role: "USER", jobTitle: "", departmentId: "" }); }}>
           <h2 className="text-xl font-bold text-text-primary mb-1">Add Team Member</h2>
@@ -344,7 +339,6 @@ export default function TeamPage() {
         </Modal>
       )}
 
-      {/* ── Profile Modal ── */}
       {showProfile && selectedMember && (
         <Modal onClose={() => { setShowProfile(false); setSelectedMember(null); }}>
           <div className="flex flex-col items-center gap-3 mb-7">

@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 import { AppRootState } from "@/store";
 import Button from "@/components/ui/Button";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface DocumentFile {
   _id: string;
   name: string;
@@ -64,7 +63,6 @@ type Tab = "all" | "mine";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 const formatSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -96,7 +94,6 @@ const selectClasses = "px-3 py-2 rounded-lg bg-surface border border-border text
 
 const inputClasses = "w-full px-4 py-3 rounded-xl bg-surface border border-border text-text-primary text-sm outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all";
 
-// ── Modal ──────────────────────────────────────────────────────────────────
 function Modal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-5" onClick={onClose}>
@@ -116,7 +113,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
 export default function DocumentsPage() {
   const { token, user } = useSelector((state: AppRootState) => state.auth) as {
     token: string | null;
@@ -371,7 +367,6 @@ export default function DocumentsPage() {
         </div>
       )}
 
-      {/* Top row */}
       <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
         <input
           type="text" placeholder="Search documents..." value={filters.search}
@@ -385,7 +380,6 @@ export default function DocumentsPage() {
         </Button>
       </div>
 
-      {/* Tabs */}
       <div className="flex items-center gap-2 mb-4 border-b border-border pb-0">
         <button
           className={`px-4 py-2 rounded-t-lg text-sm font-semibold cursor-pointer transition-all border-b-2 ${
@@ -419,7 +413,6 @@ export default function DocumentsPage() {
         </button>
       </div>
 
-      {/* Filter bar */}
       <div className="flex items-center gap-3 mb-5 px-4 py-3 rounded-2xl bg-surface/50 border border-border flex-wrap backdrop-blur-sm shadow-sm">
         <span className="text-xs text-text-muted font-bold tracking-wider mr-1">
           FILTERS {activeFilterCount > 0 && (
@@ -484,7 +477,6 @@ export default function DocumentsPage() {
         )}
       </div>
 
-      {/* Upload progress */}
       {isUploading && (
         <div className="mb-5 p-4 rounded-xl bg-surface border border-border">
           <div className="flex justify-between mb-2">
@@ -500,7 +492,6 @@ export default function DocumentsPage() {
         </div>
       )}
 
-      {/* Stats */}
       <div className="flex gap-4 mb-6 flex-wrap">
         {[
           { label: "Total Files", value: sourceList.length,                                                              colorClass: "text-primary", bg: "bg-primary/5" },
@@ -515,7 +506,6 @@ export default function DocumentsPage() {
         ))}
       </div>
 
-      {/* Document grid */}
       {isLoading ? (
         <div className="flex justify-center py-20 opacity-50">
           <div className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
@@ -553,7 +543,6 @@ export default function DocumentsPage() {
                   deletingId === doc._id ? "opacity-50" : "opacity-100"
                 }`}
               >
-                {/* Edit icon */}
                 {userCanEdit && (
                   <button
                     onClick={() => openEditModal(doc)}
@@ -567,7 +556,6 @@ export default function DocumentsPage() {
                   </button>
                 )}
 
-                {/* File header */}
                 <div className={`flex items-center gap-3.5 ${userCanEdit ? "pr-8" : ""}`}>
                   <div className={`w-12 h-12 rounded-xl ${fileInfo.bgClass} flex items-center justify-center text-2xl shrink-0 shadow-sm`}>
                     {fileInfo.icon}
@@ -578,7 +566,6 @@ export default function DocumentsPage() {
                   </div>
                 </div>
 
-                {/* Department badge + My Upload tag */}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {doc.department && (
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/5 border border-primary/10">
@@ -593,7 +580,6 @@ export default function DocumentsPage() {
                   )}
                 </div>
 
-                {/* AI status + date */}
                 <div className="flex items-center justify-between border-t border-border/50 pt-3">
                   <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${
                     doc.aiProcessingStatus === "COMPLETED"
@@ -605,7 +591,6 @@ export default function DocumentsPage() {
                   <span className="text-[10px] text-text-muted font-medium">{formatDate(doc.createdAt)}</span>
                 </div>
 
-                {/* Uploader + visibility */}
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-text-muted font-medium">
                     {isMyDoc ? "Uploaded by You" : `By ${doc.uploadedBy?.name ?? "Unknown"}`}
@@ -621,7 +606,6 @@ export default function DocumentsPage() {
                   </span>
                 </div>
 
-                {/* Action buttons */}
                 <div className="flex gap-2 mt-auto pt-2 border-t border-border/50">
                   <a href={doc.s3Url} target="_blank" rel="noopener noreferrer"
                     className="flex-1 py-2 rounded-lg text-center bg-primary/15 border border-primary/30 text-primary text-xs font-bold no-underline hover:bg-primary/25 transition-colors">
@@ -646,7 +630,6 @@ export default function DocumentsPage() {
         </div>
       )}
 
-      {/* Modal: Upload File Configuration */}
       {showUploadModal && pendingFile && (
         <Modal onClose={() => { setShowUploadModal(false); setPendingFile(null); }}>
           <h2 className="text-lg font-bold mb-1 text-text-primary">Upload Document</h2>
@@ -701,7 +684,6 @@ export default function DocumentsPage() {
         </Modal>
       )}
 
-      {/* Modal: Edit File Configuration */}
       {editingDoc && (
         <Modal onClose={() => setEditingDocId(null)}>
           <h2 className="text-lg font-bold mb-1 text-text-primary">Edit Document</h2>

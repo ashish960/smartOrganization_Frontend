@@ -6,7 +6,6 @@ import AuthLayout from "@/components/layout/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useToastContext } from "@/context/ToastContext";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 type Step = 1 | 2;
 
 interface PersonalData {
@@ -35,7 +34,6 @@ interface OrgErrors {
   size: string;
 }
 
-// ── Constants ──────────────────────────────────────────────────────────────
 const INDUSTRIES = [
   { value: "", label: "Select Industry" },
   { value: "TECHNOLOGY", label: "Technology" },
@@ -57,7 +55,6 @@ const SIZES = [
   { value: "500+", label: "500+ employees" },
 ];
 
-// ── Component ──────────────────────────────────────────────────────────────
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isLoading } = useAuth();
@@ -65,7 +62,6 @@ export default function RegisterPage() {
 
   const [step, setStep] = useState<Step>(1);
 
-  // Step 1 state
   const [personal, setPersonal] = useState<PersonalData>({
     name: "",
     email: "",
@@ -79,7 +75,6 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
-  // Step 2 state
   const [org, setOrg] = useState<OrgData>({
     orgName: "",
     industry: "",
@@ -91,7 +86,6 @@ export default function RegisterPage() {
     size: "",
   });
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPersonal((prev) => ({ ...prev, [name]: value }));
@@ -110,7 +104,6 @@ export default function RegisterPage() {
     }
   };
 
-  // ── Validation ────────────────────────────────────────────────────────────
   const validateStep1 = (): boolean => {
     const errors: PersonalErrors = {
       name: "",
@@ -182,7 +175,6 @@ export default function RegisterPage() {
     return valid;
   };
 
-  // ── Step navigation ───────────────────────────────────────────────────────
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep1()) setStep(2);
@@ -190,7 +182,6 @@ export default function RegisterPage() {
 
   const handleBack = () => setStep(1);
 
-  // ── Final submit ──────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep2()) return;
@@ -213,7 +204,6 @@ export default function RegisterPage() {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <AuthLayout
       title={step === 1 ? "Create Account" : "Setup Organization"}
@@ -228,10 +218,8 @@ export default function RegisterPage() {
         href: "/auth/login",
       }}
     >
-      {/* ── Step Indicator ── */}
       <div className="mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
-          {/* Step 1 dot */}
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all duration-300 ${
               step >= 1
@@ -242,7 +230,6 @@ export default function RegisterPage() {
             {step > 1 ? "✓" : "1"}
           </div>
 
-          {/* Connector line */}
           <div
             className={`h-0.5 w-20 rounded-sm transition-all duration-300 ${
               step > 1
@@ -251,7 +238,6 @@ export default function RegisterPage() {
             }`}
           />
 
-          {/* Step 2 dot */}
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
               step === 2
@@ -269,10 +255,8 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      {/* ── Step 1: Personal Info ── */}
       {step === 1 && (
         <form onSubmit={handleNextStep} className="space-y-4">
-          {/* Row: Name + Email */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="dark-label">Full Name</label>
@@ -307,7 +291,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Row: Password + Confirm */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="dark-label">Password</label>
@@ -348,10 +331,8 @@ export default function RegisterPage() {
         </form>
       )}
 
-      {/* ── Step 2: Organization Info ── */}
       {step === 2 && (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Organization Name */}
           <div>
             <label className="dark-label">Organization Name</label>
             <input
@@ -368,7 +349,6 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Row: Industry + Size */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="dark-label">Industry</label>
@@ -409,7 +389,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-3 mt-2">
             <button
               type="button"

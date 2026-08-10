@@ -6,8 +6,6 @@ export interface NavItem {
   href: string;
 }
 
-// Single source of truth for all sidebar navigation
-// To add a new page: just add an entry here — sidebar updates automatically
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard",   icon: "Dashboard",   href: "/dashboard"   },
   { label: "Documents",   icon: "Documents",   href: "/documents"   },

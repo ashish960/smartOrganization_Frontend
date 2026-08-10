@@ -1,4 +1,3 @@
-// User type
 export interface User {
   id: string;
   name: string;
@@ -6,7 +5,6 @@ export interface User {
   role: string;
 }
 
-// Auth State type
 export interface AuthState {
   user: User | null;
   token: string | null;
@@ -15,7 +13,6 @@ export interface AuthState {
   error: string | null;
 }
 
-// Root State type
 export interface RootState {
   auth: AuthState;
 }

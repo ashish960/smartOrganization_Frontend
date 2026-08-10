@@ -119,7 +119,7 @@ export default function StatsGrid() {
       sub: `${(1024 - stats.storageUsedMB).toFixed(1)} MB available`,
       color: "warning",
       icon: "Analytics" as const,
-      route: "/documents", // Storage points to documents for management
+      route: "/documents",
     },
   ];
 

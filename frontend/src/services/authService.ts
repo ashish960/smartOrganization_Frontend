@@ -1,7 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const authService = {
-    // Register
     register: async (name, email, password, organizationData) => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -24,7 +23,6 @@ const authService = {
         }
     },
 
-    // Login
     login: async (email, password) => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -47,7 +45,6 @@ const authService = {
         }
     },
 
-    // Get Profile (protected route)
     getProfile: async (token) => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/profile`, {

@@ -6,7 +6,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { AppRootState } from "@/store";
 import { loginSuccess } from "@/store/slices/authSlice";
 
-// ── Types ──────────────────────────────────────────────────────────────────
 interface UserProfile {
   _id: string;
   name: string;
@@ -63,19 +62,15 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Profile form
   const [profileForm, setProfileForm] = useState({ name: "", jobTitle: "", phone: "" });
   const [profileSaving, setProfileSaving] = useState(false);
 
-  // Password form
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [passwordSaving, setPasswordSaving] = useState(false);
 
-  // Org form
   const [orgForm, setOrgForm] = useState({ name: "", industry: "", size: "" });
   const [orgSaving, setOrgSaving] = useState(false);
 
-  // Notifications
   const [notifications, setNotifications] = useState({
     emailOnUpload:   true,
     emailOnMember:   true,
@@ -84,7 +79,6 @@ export default function SettingsPage() {
     securityAlerts:  true,
   });
 
-  // Toast
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
@@ -93,7 +87,6 @@ export default function SettingsPage() {
 
   const isAdmin = (authUser as { role?: string } | null)?.role === "ORG_ADMIN";
 
-  // ── Fetch profile ────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -114,7 +107,6 @@ export default function SettingsPage() {
     return () => { cancelled = true; };
   }, [token]);
 
-  // ── Update profile ───────────────────────────────────────────────────────
   const handleProfileSave = async () => {
     if (!profileForm.name.trim()) return showToast("Name is required", "error");
     setProfileSaving(true);
@@ -127,7 +119,6 @@ export default function SettingsPage() {
       const data = await res.json();
       if (data.success) {
         setProfile(prev => prev ? { ...prev, ...profileForm } : null);
-        // Update Redux store
         dispatch(loginSuccess({ user: { ...authUser, ...profileForm }, token }));
         localStorage.setItem("user", JSON.stringify({ ...authUser, ...profileForm }));
         showToast("Profile updated successfully!", "success");
@@ -136,7 +127,6 @@ export default function SettingsPage() {
     finally { setProfileSaving(false); }
   };
 
-  // ── Change password ──────────────────────────────────────────────────────
   const handlePasswordSave = async () => {
     if (!passwordForm.currentPassword) return showToast("Current password is required", "error");
     if (passwordForm.newPassword.length < 8) return showToast("New password must be at least 8 characters", "error");
@@ -157,7 +147,6 @@ export default function SettingsPage() {
     finally { setPasswordSaving(false); }
   };
 
-  // ── Update organization ──────────────────────────────────────────────────
   const handleOrgSave = async () => {
     if (!orgForm.name.trim()) return showToast("Organization name is required", "error");
     setOrgSaving(true);
@@ -192,7 +181,6 @@ export default function SettingsPage() {
   return (
     <DashboardLayout title="Settings" subtitle="Manage your account and organization">
 
-      {/* Toast */}
       {toast && (
         <div className={`fixed top-20 right-6 z-[999] px-5 py-3 rounded-xl text-sm font-medium
           ${toast.type === "success"
@@ -206,7 +194,6 @@ export default function SettingsPage() {
 
       <div className="grid grid-cols-[220px_1fr] gap-6">
 
-        {/* ── Sidebar tabs ── */}
         <div className="flex flex-col gap-1">
           {tabs.map(tab => (
             <button
@@ -222,7 +209,6 @@ export default function SettingsPage() {
             </button>
           ))}
 
-          {/* User card */}
           {profile && (
             <div className="mt-5 p-3.5 rounded-xl bg-surface border border-border">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-base font-bold text-white mx-auto mb-2.5">
@@ -235,10 +221,8 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* ── Content ── */}
         <div>
 
-          {/* Profile */}
           {activeTab === "profile" && (
             <Section title="Profile Information" subtitle="Update your personal details">
               <div className="grid grid-cols-2 gap-4">
@@ -261,7 +245,6 @@ export default function SettingsPage() {
             </Section>
           )}
 
-          {/* Password */}
           {activeTab === "password" && (
             <Section title="Change Password" subtitle="Update your account password">
               <Field label="Current Password">
@@ -286,7 +269,6 @@ export default function SettingsPage() {
             </Section>
           )}
 
-          {/* Organization */}
           {activeTab === "organization" && (
             isAdmin ? (
               <Section title="Organization Settings" subtitle="Update your organization details">
@@ -306,7 +288,6 @@ export default function SettingsPage() {
                   </Field>
                 </div>
 
-                {/* Plan info */}
                 <div className="px-4 py-3.5 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 mb-4">
                   <p className="text-[13px] font-semibold mb-1 text-text-primary">
                     Current Plan: <span className="text-primary">{profile?.organization?.plan || "STARTER"}</span>
@@ -327,7 +308,6 @@ export default function SettingsPage() {
             )
           )}
 
-          {/* Notifications */}
           {activeTab === "notifications" && (
             <Section title="Notification Preferences" subtitle="Choose what you want to be notified about">
               {[

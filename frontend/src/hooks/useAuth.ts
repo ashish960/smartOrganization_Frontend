@@ -15,12 +15,10 @@ import { AppDispatch, AppRootState } from "../store/index";
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  // ✅ Now TypeScript knows the state type
   const { user, token, isLoading, isAuthenticated, error } = useSelector(
     (state: AppRootState) => state.auth
   );
 
-  // Register
   const register = async (
   name: string,
   email: string,
@@ -47,7 +45,6 @@ export const useAuth = () => {
   }
 };
 
-  // Login
   const login = async (email: string, password: string) => {
     dispatch(loginStart());
     try {
@@ -62,12 +59,10 @@ export const useAuth = () => {
     }
   };
 
-  // Logout
   const logoutUser = () => {
     dispatch(logout());
   };
 
-  // Restore auth from localStorage
   const restoreAuthFromStorage = () => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");

@@ -17,11 +17,9 @@ const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
     },
     ref
   ) => {
-    // Base styles
     const baseStyles =
       "font-semibold text-neutral-700 dark:text-neutral-300 cursor-pointer transition-colors duration-200";
 
-    // Size styles
     const sizeStyles = {
       sm: "text-xs md:text-sm",
       md: "text-sm md:text-base",
