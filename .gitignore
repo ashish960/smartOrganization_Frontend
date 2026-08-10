@@ -8,6 +8,8 @@
 
 # env files
 .env*
+!/frontend/.env.production
+!/frontend/.env.example
 /frontend/.env*
 
 # production
