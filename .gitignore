@@ -3,18 +3,19 @@
 /frontend/node_modules
 
 # next.js
-/frontend/.next/cache/
+/frontend/.next/
 /frontend/out/
 
-# env files
+# track dist (static build output)
+!/frontend/dist/
+
+# env files (track .env.production and .env.example)
 .env*
 !/frontend/.env.production
 !/frontend/.env.example
-/frontend/.env*
 
 # production
 /frontend/build
-/frontend/.next
 
 # misc
 .DS_Store

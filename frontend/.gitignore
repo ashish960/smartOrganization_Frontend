@@ -1,20 +1,13 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
 # testing
 /coverage
 
 # next.js
-/.next/cache/
+/.next/
 /out/
 
 # production
@@ -28,11 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files
+# env files (track .env.production and .env.example, ignore secret local envs)
 .env*
-.env.production
+!.env.production
 !.env.example
 
 # vercel
@@ -42,7 +34,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
-.next/
 .turbo/
 node_modules/.cache/
